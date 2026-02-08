@@ -1,8 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.1.1"
+    }
+
     namespace = "com.example.nugget"
     compileSdk {
         version = release(36)
@@ -45,10 +54,16 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    implementation("androidx.compose.material3:material3:1.4.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.5.0-alpha13")
 
     val cameraxVersion = "1.5.2"
     implementation(libs.androidx.camera.core)
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    val nav_version = "2.9.7"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
 }
