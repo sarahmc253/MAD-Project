@@ -8,7 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+<<<<<<< HEAD:app/src/main/java/com/example/mad_project/ui/login/LoginScreen.kt
 import com.example.mad_project.ui.theme.ShelfScanGreen
+=======
+import com.example.nugget.data.getFoodItems
+>>>>>>> c1512be (firebase connection):app/src/main/java/com/example/nugget/ui/login/LoginScreen.kt
 
 @Composable
 fun LoginScreen(
@@ -25,4 +29,5 @@ fun LoginScreen(
             Text("Login")
         }
     }
+    Text(getFoodItems().toString())
 }

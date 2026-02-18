@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "547761633122",
+    "firebase_url": "https://mad-food-storage-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "mad-food-storage",
+    "storage_bucket": "mad-food-storage.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547761633122:android:54808448b202cb2ab31e3b",
+        "android_client_info": {
+          "package_name": "com.example.nugget"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMIFadPT5q2BCuScczTNr94SCkwuS4ovw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

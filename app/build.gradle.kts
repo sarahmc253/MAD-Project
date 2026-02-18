@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.compose)
 }
 
@@ -70,6 +71,13 @@ dependencies {
 
     val nav_version = "2.9.7"
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
+
+    // Add the dependency for the Realtime Database library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-database")
 }
 
 // Alias for IDEs/tools that expect the Java plugin's testClasses task
