@@ -1,4 +1,4 @@
-package com.example.nugget
+package com.example.mad_project
 
 import org.junit.Test
 

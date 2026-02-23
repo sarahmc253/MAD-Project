@@ -1,4 +1,4 @@
-package com.example.nugget.ui.scanner
+package com.example.mad_project.ui.scanner
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -8,14 +8,26 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.camera.view.PreviewView
+import com.example.mad_project.ui.theme.ShelfScanGreen
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.Executors
@@ -27,23 +39,18 @@ fun BarcodeScannerScreen(
     val context = LocalContext.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
-    // Create the PreviewView inside Compose
     val previewView = remember { PreviewView(context) }
 
-    // Clean up executor when leaving screen
     DisposableEffect(Unit) {
         onDispose {
             cameraExecutor.shutdown()
         }
     }
 
-    // Camera permission check (simple version)
     val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
             PackageManager.PERMISSION_GRANTED
 
     if (!granted) {
-        // In Compose you normally use rememberLauncherForActivityResult,
-        // but to keep this minimal: show a message.
         LaunchedEffect(Unit) {
             Toast.makeText(context, "Camera permission not granted.", Toast.LENGTH_LONG).show()
             onDone()
@@ -51,7 +58,6 @@ fun BarcodeScannerScreen(
         return
     }
 
-    // Start camera once when the composable enters composition
     LaunchedEffect(Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         val cameraProvider = cameraProviderFuture.get()
@@ -73,8 +79,6 @@ fun BarcodeScannerScreen(
                             value,
                             LENGTH_INDEFINITE
                         ).show()
-                        // If you want to treat "first scan" as done:
-                        // onDone()
                     }
                 })
             }
@@ -88,7 +92,20 @@ fun BarcodeScannerScreen(
         )
     }
 
-    AndroidView(
-        factory = { previewView }
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        AndroidView(
+            factory = { previewView },
+            modifier = Modifier.fillMaxSize()
+        )
+        FloatingActionButton(
+            onClick = onDone,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(24.dp),
+            containerColor = ShelfScanGreen,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            Icon(Icons.Default.Check, contentDescription = "Done")
+        }
+    }
 }
