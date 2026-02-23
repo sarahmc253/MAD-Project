@@ -30,7 +30,7 @@ class BarcodeImageAnalyzer(
     private var lastValue: String? = null
     private var lastShownAtMs: Long = 0L
 
-    @OptIn(ExperimentalGetImage::class)
+    @androidx.annotation.OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image
         if (mediaImage == null) {
