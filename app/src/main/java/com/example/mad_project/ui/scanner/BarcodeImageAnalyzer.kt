@@ -1,4 +1,4 @@
-package com.example.nugget.ui.scanner
+package com.example.mad_project.ui.scanner
 
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis

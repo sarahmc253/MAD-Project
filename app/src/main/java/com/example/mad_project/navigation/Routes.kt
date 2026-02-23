@@ -1,4 +1,4 @@
-package com.example.nugget.navigation
+package com.example.mad_project.navigation
 
 object Routes {
     const val LOGIN = "login"
