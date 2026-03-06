@@ -3,18 +3,23 @@ package com.example.mad_project.ui.shopping
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import com.example.mad_project.data.FoodItem
+import com.example.mad_project.data.PantryModel
 
 @Composable
 fun PantryList(
-    pantry: List<FoodItem>,
-    onItemClick: (FoodItem) -> Unit
+    pantry: List<PantryModel>,
+    onUpdateClick: (PantryModel) -> Unit,
+    onDeleteClick: (PantryModel) -> Unit
 ) {
     LazyColumn {
-        items(pantry) { food ->
+        items(
+            items = pantry,
+            key = { it.itemId ?: it.foodName ?: it.hashCode().toString() }
+        ) { item ->
             PantryItem(
-                food = food,
-                onClick = { onItemClick(food) }
+                item = item,
+                onUpdateClick = onUpdateClick,
+                onDeleteClick = onDeleteClick
             )
         }
     }

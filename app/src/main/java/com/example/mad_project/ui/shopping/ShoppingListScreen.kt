@@ -9,13 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.mad_project.ui.components.AppTopBar
-import com.example.mad_project.ui.components.EmptyView
 import com.example.mad_project.ui.theme.MADProjectTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-//onBackClick: () -> Unit
-//, onBackClick = onBackClick
 fun ShoppingListScreen() {
     Scaffold(
         topBar = { AppTopBar(title = "Shopping List", showBack = true) }
@@ -24,12 +21,8 @@ fun ShoppingListScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-        ){
-            PantryScreen(
-                onItemClick = { food ->
-                    println("Clicked: ${food.foodName}")
-                }
-            )
+        ) {
+            PantryScreen()
         }
     }
 }
@@ -38,7 +31,6 @@ fun ShoppingListScreen() {
 @Composable
 private fun ShoppingListScreenPreview() {
     MADProjectTheme(dynamicColour = false) {
-        //onBackClick = {}
         ShoppingListScreen()
     }
 }
