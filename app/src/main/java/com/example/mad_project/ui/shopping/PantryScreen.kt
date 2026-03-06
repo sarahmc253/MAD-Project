@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.PantryModel
+import com.example.mad_project.ui.components.PantryViewModel
 
 
 //temporary screen for testing

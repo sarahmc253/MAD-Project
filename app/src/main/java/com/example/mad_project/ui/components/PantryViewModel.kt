@@ -1,4 +1,4 @@
-package com.example.mad_project.ui.shopping
+package com.example.mad_project.ui.components
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
