@@ -8,7 +8,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.mad_project.data.getFoodItems
 import com.example.mad_project.ui.components.AppTopBar
 import com.example.mad_project.ui.components.EmptyView
 import com.example.mad_project.ui.theme.MADProjectTheme
