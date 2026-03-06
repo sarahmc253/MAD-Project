@@ -12,7 +12,25 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 
-//TODO: put in prompt for generation or change
+
+/**
+ * Sources: https://firebase.google.com/docs/database/android/lists-of-data,
+ * https://canopas.com/use-firestore-and-firebase-realtime-database-with-kotlin-flow-76a8f260e31a
+ * https://developer.android.com/kotlin/flow
+ *
+ * I originally made read event listeners using guides from the sources stated.
+ *
+ * Then I generated setting and deleting so that everything was uniform. It also created the
+ * FirebaseWriteResult class.
+ * I did the logging myself.
+ *
+ * Prompt: Using this guide https://firebase.google.com/docs/database/android/lists-of-data
+ * modify the existing functions so that I also have flow events for adding, writing and deleting data
+ * from a realtime firebase with kotlin flows.
+ *
+ * (flow events for writing and adding later became one function to reduce code duplication)
+ *
+ */
 sealed class FirebaseWriteResult {
     data object Loading : FirebaseWriteResult()
     data object Success : FirebaseWriteResult()

@@ -5,6 +5,7 @@ import com.example.mad_project.ui.theme.ExpiredRed
 import com.example.mad_project.ui.theme.ExpiringSoonOrange
 import com.example.mad_project.ui.theme.TextPrimary
 
+//DUMMY DATA
 data class InventoryItem(
     val id: Long,
     val name: String,

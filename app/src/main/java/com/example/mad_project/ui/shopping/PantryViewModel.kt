@@ -14,7 +14,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.collections.emptyList
 
-//TODO: put prompt for initial generation
+/**
+ * Sources:
+ * https://developer.android.com/topic/libraries/architecture/viewmodel
+ *
+ * We chose to use a ViewModel because it looked like a good and simple way to manage
+ * coroutines for realtime firebase operations.
+ *
+ * prompt: Use this guide https://developer.android.com/topic/libraries/architecture/viewmodel to
+ * implement a simple ViewModel that performs crud operations on a firebase database. The attached files
+ * show the relevant functions and models to use.
+ */
 data class PantryUiState(
     val items: List<PantryModel> = emptyList(),
     val isLoading: Boolean = true,

@@ -28,7 +28,20 @@ fun getPantry(): Flow<List<PantryModel>> {
     }
 }
 
-//TODO: put in prompt for generation with the item ids
+/**
+ * I generated our solution to deal with writing and removing items in a non-relational database.
+ *
+ * ChatGPT recommended to copy the key that's automatically generated when you create an entry, and to
+ * use that as a field for a unique ID.
+ *
+ * Prompt 1: How do you get an itemId if it is generated in firebase?
+ * Prompt 2: The attached files are code to display a list of pantry items. To do: extend the functions
+ * addPantryItem, writePantryItem and deletePantryItem so that they delete the correct item in
+ * a realtime firebase database.
+ *
+ * The rest I did myself using examples from: https://firebase.google.com/docs/database/web/read-and-write
+ * and: https://canopas.com/use-firestore-and-firebase-realtime-database-with-kotlin-flow-76a8f260e31a
+ */
 
 fun addPantryItem(pantryItem: PantryModel): Flow<FirebaseWriteResult> {
     val db = Firebase.database(DB_URL)
