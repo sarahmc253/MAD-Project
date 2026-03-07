@@ -18,6 +18,7 @@ import com.example.mad_project.ui.inventory.InventoryListScreen
 import com.example.mad_project.ui.inventory.ShelfScanBottomBar
 import com.example.mad_project.ui.item.AddItemScreen
 import com.example.mad_project.ui.item.ItemDetailsScreen
+import com.example.mad_project.ui.shopping.ShoppingListScreen
 import com.example.mad_project.ui.theme.MADProjectTheme
 
 /**
@@ -113,9 +114,16 @@ private fun PlaceholderTabScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentAlignment = Alignment.Center
+            contentAlignment = if (currentTab == "List") Alignment.TopStart else Alignment.Center
         ) {
-            Text("$title – Coming soon", modifier = Modifier.padding(16.dp))
+            if (currentTab == "List") {
+                ShoppingListScreen()
+            } else {
+                Text(
+                    text = "$title – Coming soon",
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
     }
 }
