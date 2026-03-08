@@ -21,7 +21,7 @@ fun AppNavGraph() {
             composable(Routes.LOGIN) {
                 LoginScreen(
                     onLoginSuccess = {
-                        navController.navigate(Routes.SCANNER) {
+                        navController.navigate(Routes.HOME) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     }

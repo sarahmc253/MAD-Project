@@ -8,6 +8,16 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 
+/**
+ * Sources: https://developers.google.com/ml-kit/vision/barcode-scanning/android,
+ * CameraX ImageAnalysis/ImageProxy APIs.
+ *
+ * ImageAnalysis.Analyzer that detects barcodes from camera frames using ML Kit.
+ * Debounces repeated detections (lastValue/lastShownAtMs, 1.5s); callback runs on
+ * the camera executor thread so callers must switch to Main for UI/state updates.
+ *
+ * Prompt: Implement barcode scanning for the Add Item flow using ML Kit and CameraX.
+ */
 class BarcodeImageAnalyzer(
     private val onBarcodeDetected: (Barcode) -> Unit
 ) : ImageAnalysis.Analyzer {
@@ -20,7 +30,8 @@ class BarcodeImageAnalyzer(
             Barcode.FORMAT_EAN_8,
             Barcode.FORMAT_UPC_A,
             Barcode.FORMAT_UPC_E,
-            Barcode.FORMAT_CODE_128
+            Barcode.FORMAT_CODE_128,
+            Barcode.FORMAT_CODE_39
         )
         .enableAllPotentialBarcodes()
         .build()
