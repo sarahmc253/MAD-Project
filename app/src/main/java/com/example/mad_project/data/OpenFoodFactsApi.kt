@@ -9,7 +9,15 @@ import java.net.URL
 private const val BASE_URL = "https://world.openfoodfacts.net/api/v2/product"
 private const val FIELDS = "product_name,brands,image_url,generic_name"
 
-/** Fetches product by barcode from Open Food Facts API. Returns null if not found or on error. */
+/**
+ * Sources: https://world.openfoodfacts.net/api/v2/product,
+ * Open Food Facts API (fields: code, status, product_name, brands, image_url, generic_name).
+ *
+ * Fetches product by barcode via GET request; uses HttpURLConnection and JSONObject.
+ * Runs on Dispatchers.IO. Returns null if product not found or on network/parse error.
+ *
+ * Prompt: Use Open Food Facts API to identify what the items the barcodes belong to.
+ */
 suspend fun fetchProductByBarcode(barcode: String): OpenFoodFactsProduct? = withContext(Dispatchers.IO) {
     try {
         val url = URL("$BASE_URL/$barcode.json?fields=code,status,$FIELDS")

@@ -52,15 +52,16 @@ import java.util.concurrent.Executors
 
 /**
  * Sources: CameraX (Preview + ImageAnalysis), bindToLifecycle(lifecycleOwner),
- * ActivityResultContracts.RequestPermission.
+ * ActivityResultContracts.RequestPermission, Settings.ACTION_APPLICATION_DETAILS_SETTINGS.
  *
- * Add Item screen with live camera and barcode scanning. 
- * On scan, looks up product
- * via Open Food Facts and shows name/brand. Handles camera permission and ties
- * the camera to the composable lifecycle.
+ * Add Item screen with live camera and barcode scanning. On scan, looks up product via
+ * Open Food Facts and shows name/brand. Tap Add opens edit-details dialog (name, expiry, quantity);
+ * Enter Manually opens the same dialog with empty name. Camera permission: if denied, show
+ * Open Settings button to deep-link to app permissions. Callback passes (name, expiryDate, quantity)
+ * to add to pantry.
  *
- * Prompt: Wire the Add Item screen to the camera scanner and Open Food Facts API
- * so scanned barcodes are resolved to product name and brand before adding.
+ * Prompt: Wire Add Item to camera and Open Food Facts; add edit-details dialog before adding;
+ * allow manual add; add Open Settings when camera permission denied.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
