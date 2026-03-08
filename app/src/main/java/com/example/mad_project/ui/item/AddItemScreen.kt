@@ -78,6 +78,7 @@ fun AddItemScreen(
     var productInfo by remember { mutableStateOf<OpenFoodFactsProduct?>(null) }
     var productLoading by remember { mutableStateOf(false) }
     var showEditDetailsDialog by remember { mutableStateOf(false) }
+    var openedFromManualEntry by remember { mutableStateOf(false) }
     var dialogName by remember { mutableStateOf("") }
     var dialogExpiry by remember { mutableStateOf("") }
     var dialogQuantity by remember { mutableStateOf("1") }
@@ -85,9 +86,10 @@ fun AddItemScreen(
 
     LaunchedEffect(showEditDetailsDialog) {
         if (showEditDetailsDialog) {
-            dialogName = productInfo?.displayName ?: scannedBarcode ?: ""
+            dialogName = if (openedFromManualEntry) "" else (productInfo?.displayName ?: scannedBarcode ?: "")
             dialogExpiry = ""
             dialogQuantity = "1"
+            openedFromManualEntry = false
         }
     }
     val previewView = remember { PreviewView(context) }
@@ -386,9 +388,12 @@ fun AddItemScreen(
             }
         }
 
-        // Enter Manually button at bottom
+        // Enter Manually button at bottom – opens same add dialog with empty name
         Button(
-            onClick = onEnterManuallyClick,
+            onClick = {
+                openedFromManualEntry = true
+                showEditDetailsDialog = true
+            },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
@@ -444,7 +449,7 @@ fun AddItemScreen(
                 confirmButton = {
                     Button(
                         onClick = {
-                            val name = dialogName.trim().ifBlank { "Scanned item" }
+                            val name = dialogName.trim().ifBlank { "Manual item" }
                             val expiry = dialogExpiry.trim().takeIf { it.isNotBlank() }
                             val quantity = dialogQuantity.toFloatOrNull() ?: 1f
                             onAddScannedItem(name, expiry, quantity)
