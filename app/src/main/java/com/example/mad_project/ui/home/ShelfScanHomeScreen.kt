@@ -3,17 +3,27 @@ package com.example.mad_project.ui.home
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mad_project.data.PantryModel
+import com.example.mad_project.ui.components.PantryViewModel
 import com.example.mad_project.ui.inventory.InventoryListScreen
 import com.example.mad_project.ui.inventory.ShelfScanBottomBar
 import com.example.mad_project.ui.item.AddItemScreen
@@ -26,10 +36,12 @@ import com.example.mad_project.ui.theme.MADProjectTheme
  * Used as the HOME destination after Login and Scanner in the merged app.
  */
 @Composable
-fun ShelfScanHomeScreen() {
-    var currentTab by remember { mutableStateOf("Inventory") }
-    var addItemOverlay by remember { mutableStateOf(false) }
-    var detailItemId by remember { mutableStateOf<Long?>(null) }
+fun ShelfScanHomeScreen(
+    pantryViewModel: PantryViewModel = viewModel()
+) {
+    var currentTab by rememberSaveable { mutableStateOf("Inventory") }
+    var addItemOverlay by rememberSaveable { mutableStateOf(false) }
+    var detailItemId by rememberSaveable { mutableStateOf<Long?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentTab) {
@@ -48,7 +60,8 @@ fun ShelfScanHomeScreen() {
                 onInventoryClick = { currentTab = "Inventory" },
                 onListClick = { currentTab = "List" },
                 onRecipesClick = { currentTab = "Recipes" },
-                onSettingsClick = { currentTab = "Settings" }
+                onSettingsClick = { currentTab = "Settings" },
+                onAddClick = { addItemOverlay = true }
             )
             "Recipes" -> PlaceholderTabScreen(
                 title = "Recipes",
@@ -56,7 +69,8 @@ fun ShelfScanHomeScreen() {
                 onInventoryClick = { currentTab = "Inventory" },
                 onListClick = { currentTab = "List" },
                 onRecipesClick = { currentTab = "Recipes" },
-                onSettingsClick = { currentTab = "Settings" }
+                onSettingsClick = { currentTab = "Settings" },
+                onAddClick = { addItemOverlay = true }
             )
             "Settings" -> PlaceholderTabScreen(
                 title = "Settings",
@@ -64,7 +78,8 @@ fun ShelfScanHomeScreen() {
                 onInventoryClick = { currentTab = "Inventory" },
                 onListClick = { currentTab = "List" },
                 onRecipesClick = { currentTab = "Recipes" },
-                onSettingsClick = { currentTab = "Settings" }
+                onSettingsClick = { currentTab = "Settings" },
+                onAddClick = { addItemOverlay = true }
             )
         }
 
@@ -72,7 +87,17 @@ fun ShelfScanHomeScreen() {
             AddItemScreen(
                 onBackClick = { addItemOverlay = false },
                 onEnterManuallyClick = { addItemOverlay = false },
-                onAddScannedItem = { addItemOverlay = false }
+                onAddScannedItem = { name, expiryDate, quantity ->
+                    pantryViewModel.addItem(
+                        PantryModel(
+                            foodName = name,
+                            dateScanned = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
+                            expiryDate = expiryDate,
+                            quantity = quantity
+                        )
+                    )
+                    addItemOverlay = false
+                }
             )
         }
 
@@ -96,10 +121,23 @@ private fun PlaceholderTabScreen(
     onInventoryClick: () -> Unit,
     onListClick: () -> Unit,
     onRecipesClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onAddClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = { },
+        floatingActionButton = {
+            if (currentTab == "List") {
+                FloatingActionButton(
+                    onClick = onAddClick,
+                    containerColor = com.example.mad_project.ui.theme.ShelfScanGreen,
+                    contentColor = Color.White,
+                    shape = CircleShape
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Item")
+                }
+            }
+        },
         bottomBar = {
             ShelfScanBottomBar(
                 currentTab = currentTab,
