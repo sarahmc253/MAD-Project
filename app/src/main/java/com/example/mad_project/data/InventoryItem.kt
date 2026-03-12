@@ -4,6 +4,9 @@ import androidx.compose.ui.graphics.Color
 import com.example.mad_project.ui.theme.ExpiredRed
 import com.example.mad_project.ui.theme.ExpiringSoonOrange
 import com.example.mad_project.ui.theme.TextPrimary
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 //DUMMY DATA
 data class InventoryItem(
@@ -18,8 +21,49 @@ data class InventoryItem(
     val notes: String? = null,
     val category: String? = null,
     val imageUrl: String? = null,
-    val inStock: Boolean = true
+    val inStock: Boolean = true,
+    val firebaseId: String? = null
 )
+
+fun PantryModel.toInventoryItem(): InventoryItem {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val today = LocalDate.now()
+
+    val expiry = try {
+        expiryDate?.let { LocalDate.parse(it, formatter) }
+    } catch (e: Exception) {
+        null
+    }
+
+    val daysUntilExpiry = expiry?.let { ChronoUnit.DAYS.between(today, it) }
+
+    val expiryStatus = when {
+        daysUntilExpiry == null -> ExpiryStatus.OK
+        daysUntilExpiry < 0 -> ExpiryStatus.EXPIRED
+        daysUntilExpiry <= 2 -> ExpiryStatus.EXPIRES_SOON
+        else -> ExpiryStatus.OK
+    }
+
+    val expiryDisplay = when {
+        daysUntilExpiry == null -> expiryDate ?: "Unknown"
+        daysUntilExpiry < 0 -> "Expired ${-daysUntilExpiry}d ago"
+        daysUntilExpiry == 0L -> "Expires Today"
+        daysUntilExpiry == 1L -> "Expires Tomorrow"
+        else -> "Expires in $daysUntilExpiry days"
+    }
+
+    return InventoryItem(
+        id = itemId?.hashCode()?.toLong() ?: 0L,
+        firebaseId = itemId,
+        name = foodName ?: "Unknown Item",
+        quantity = quantity?.let { if (it == it.toInt().toFloat()) "${it.toInt()}" else "$it" } ?: "1",
+        location = ItemLocation.PANTRY,
+        expiryStatus = expiryStatus,
+        expiryDate = expiryDate ?: "",
+        expiryDisplay = expiryDisplay,
+        purchasedDate = dateScanned
+    )
+}
 
 enum class ItemLocation(val label: String, val chipBg: Color, val chipText: Color) {
     FRIDGE("FRIDGE", com.example.mad_project.ui.theme.FridgeBlue, com.example.mad_project.ui.theme.FridgeBlueText),
