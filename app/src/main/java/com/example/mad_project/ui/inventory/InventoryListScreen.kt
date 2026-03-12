@@ -7,14 +7,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
@@ -25,13 +31,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.data.sampleInventoryItems
 import com.example.mad_project.ui.theme.*
+
+private enum class ViewMode { LIST, GRID }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,10 +55,12 @@ fun InventoryListScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
     var statusFilter by remember { mutableStateOf("All") }
-    val items = remember { sampleInventoryItems() }
+    var viewMode by remember { mutableStateOf(ViewMode.LIST) }
+    var items by remember { mutableStateOf(sampleInventoryItems()) }
     val filteredItems = items
         .filter { it.name.contains(searchQuery, ignoreCase = true) }
         .filter { selectedCategory == "All" || it.location.name == selectedCategory.uppercase() }
+        .filter { statusFilter == "All" || it.expiryStatus.label == statusFilter }
 
     Scaffold(
         topBar = { ShelfScanTopBar() },
@@ -89,20 +101,47 @@ fun InventoryListScreen(
                 selected = selectedCategory,
                 onSelect = { selectedCategory = it }
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            MyInventoryHeader(statusFilter = statusFilter, onStatusChange = { statusFilter = it })
             Spacer(modifier = Modifier.height(8.dp))
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(filteredItems) { item ->
-                    InventoryListRow(
-                        item = item,
-                        onClick = { onItemClick(item.id) },
-                        onMenuClick = { }
-                    )
+            StatusFilterChips(
+                selected = statusFilter,
+                onSelect = { statusFilter = it }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            MyInventoryHeader(
+                viewMode = viewMode,
+                onViewModeChange = { viewMode = it }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (viewMode == ViewMode.LIST) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(filteredItems) { item ->
+                        InventoryListRow(
+                            item = item,
+                            onClick = { onItemClick(item.id) },
+                            onMenuClick = { },
+                            onDeleteClick = { items = items.filter { it.id != item.id } }
+                        )
+                    }
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp)
+                ) {
+                    items(filteredItems) { item ->
+                        InventoryGridCard(
+                            item = item,
+                            onClick = { onItemClick(item.id) },
+                            onDeleteClick = { items = items.filter { it.id != item.id } }
+                        )
+                    }
                 }
             }
         }
@@ -298,7 +337,35 @@ private fun CategoryChips(selected: String, onSelect: (String) -> Unit) {
 }
 
 @Composable
-private fun MyInventoryHeader(statusFilter: String, onStatusChange: (String) -> Unit) {
+private fun StatusFilterChips(selected: String, onSelect: (String) -> Unit) {
+    val statuses = listOf("All") + ExpiryStatus.entries.map { it.label }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        statuses.forEach { status ->
+            FilterChip(
+                selected = selected == status,
+                onClick = { onSelect(status) },
+                label = { Text(status) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = ShelfScanGreen,
+                    selectedLabelColor = Color.White,
+                    containerColor = ChipBg,
+                    labelColor = TextPrimary
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun MyInventoryHeader(
+    viewMode: ViewMode,
+    onViewModeChange: (ViewMode) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -312,31 +379,22 @@ private fun MyInventoryHeader(statusFilter: String, onStatusChange: (String) -> 
             fontWeight = FontWeight.Bold,
             color = TextPrimary
         )
-        FilterChip(
-            selected = false,
-            onClick = { },
-            label = { Text("Status: $statusFilter") },
-            leadingIcon = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { onViewModeChange(ViewMode.LIST) }) {
                 Icon(
-                    Icons.Default.Search,
-                    contentDescription = null,
-                    tint = ShelfScanGreen,
-                    modifier = Modifier.size(18.dp)
+                    Icons.Default.ViewList,
+                    contentDescription = "List view",
+                    tint = if (viewMode == ViewMode.LIST) ShelfScanGreen else TextSecondary
                 )
-            },
-            trailingIcon = {
+            }
+            IconButton(onClick = { onViewModeChange(ViewMode.GRID) }) {
                 Icon(
-                    Icons.Outlined.MoreVert,
-                    contentDescription = null,
-                    tint = TextSecondary,
-                    modifier = Modifier.size(18.dp)
+                    Icons.Default.GridView,
+                    contentDescription = "Grid view",
+                    tint = if (viewMode == ViewMode.GRID) ShelfScanGreen else TextSecondary
                 )
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                containerColor = SurfaceVariant,
-                labelColor = TextPrimary
-            )
-        )
+            }
+        }
     }
 }
 
@@ -344,8 +402,10 @@ private fun MyInventoryHeader(statusFilter: String, onStatusChange: (String) -> 
 private fun InventoryListRow(
     item: InventoryItem,
     onClick: () -> Unit,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -411,13 +471,142 @@ private fun InventoryListRow(
                     color = TextSecondary
                 )
             }
-            IconButton(onClick = onMenuClick) {
-                Icon(
-                    Icons.Outlined.MoreVert,
-                    contentDescription = "Options",
-                    tint = TextSecondary
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        Icons.Outlined.MoreVert,
+                        contentDescription = "Options",
+                        tint = TextSecondary
+                    )
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Delete", color = ExpiredRed) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = ExpiredRed
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onDeleteClick()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InventoryGridCard(
+    item: InventoryItem,
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(item.location.chipBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        item.name.first().uppercase(),
+                        color = item.location.chipText,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    )
+                }
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            Icons.Outlined.MoreVert,
+                            contentDescription = "Options",
+                            tint = TextSecondary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Delete", color = ExpiredRed) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = ExpiredRed
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onDeleteClick()
+                            }
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                item.name,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                fontSize = 14.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = item.location.chipBg
+            ) {
+                Text(
+                    item.location.label,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = item.location.chipText
                 )
             }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                item.expiryDisplay,
+                fontSize = 11.sp,
+                color = item.expiryStatus.colour,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                item.quantity,
+                fontSize = 11.sp,
+                color = TextSecondary
+            )
         }
     }
 }
@@ -522,7 +711,7 @@ private fun CategoryChipsPreview() {
 @Composable
 private fun MyInventoryHeaderPreview() {
     com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
-        MyInventoryHeader(statusFilter = "All", onStatusChange = {})
+        MyInventoryHeader(viewMode = ViewMode.LIST, onViewModeChange = {})
     }
 }
 
@@ -533,8 +722,29 @@ private fun InventoryListRowPreview() {
         InventoryListRow(
             item = sampleInventoryItems().first(),
             onClick = {},
-            onMenuClick = {}
+            onMenuClick = {},
+            onDeleteClick = {}
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun InventoryGridCardPreview() {
+    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                InventoryGridCard(item = sampleInventoryItems()[0], onClick = {}, onDeleteClick = {})
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                InventoryGridCard(item = sampleInventoryItems()[1], onClick = {}, onDeleteClick = {})
+            }
+        }
     }
 }
 
