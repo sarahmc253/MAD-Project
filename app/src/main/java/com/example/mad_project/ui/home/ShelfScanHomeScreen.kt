@@ -45,7 +45,6 @@ fun ShelfScanHomeScreen(
                 InventoryListScreen(
                     onAddClick = homeViewModel::showAddItemOverlay,
                     onItemClick = homeViewModel::openItemDetail,
-                    onShoppingClick = { homeViewModel.setCurrentTab("List") },
                     onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
                     onSettingsClick = { homeViewModel.setCurrentTab("Settings") }
                 )
@@ -81,7 +80,7 @@ fun ShelfScanHomeScreen(
                 onBackClick = homeViewModel::hideAddItemOverlay,
                 onEnterManuallyClick = homeViewModel::hideAddItemOverlay,
                 onAddScannedItem = { name, expiryDate, quantity ->
-                    inventoryViewModel.addItem(
+                    inventoryViewModel.updateItem(
                         PantryModel(
                             foodName = name,
                             dateScanned = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),

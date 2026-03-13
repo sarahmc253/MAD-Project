@@ -92,7 +92,7 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun addItem(item: PantryModel) {
         viewModelScope.launch {
-            repository.addItem(item, isOnline.value).collect { result ->
+            repository.updateItem(item, isOnline.value).collect { result ->
                 handleWriteResult(result)
             }
         }
