@@ -26,7 +26,6 @@ import com.example.mad_project.ui.inventory.InventoryListScreen
 import com.example.mad_project.ui.inventory.ShelfScanBottomBar
 import com.example.mad_project.ui.item.AddItemScreen
 import com.example.mad_project.ui.item.ItemDetailsScreen
-import com.example.mad_project.ui.shopping.ShoppingListScreen
 import com.example.mad_project.ui.theme.MADProjectTheme
 
 /**
@@ -55,7 +54,6 @@ fun ShelfScanHomeScreen(
                 title = "List",
                 currentTab = homeState.currentTab,
                 onInventoryClick = { homeViewModel.setCurrentTab("Inventory") },
-                onListClick = { homeViewModel.setCurrentTab("List") },
                 onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
                 onSettingsClick = { homeViewModel.setCurrentTab("Settings") },
                 onAddClick = homeViewModel::showAddItemOverlay
@@ -64,7 +62,6 @@ fun ShelfScanHomeScreen(
                 title = "Recipes",
                 currentTab = homeState.currentTab,
                 onInventoryClick = { homeViewModel.setCurrentTab("Inventory") },
-                onListClick = { homeViewModel.setCurrentTab("List") },
                 onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
                 onSettingsClick = { homeViewModel.setCurrentTab("Settings") },
                 onAddClick = homeViewModel::showAddItemOverlay
@@ -73,7 +70,6 @@ fun ShelfScanHomeScreen(
                 title = "Settings",
                 currentTab = homeState.currentTab,
                 onInventoryClick = { homeViewModel.setCurrentTab("Inventory") },
-                onListClick = { homeViewModel.setCurrentTab("List") },
                 onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
                 onSettingsClick = { homeViewModel.setCurrentTab("Settings") },
                 onAddClick = homeViewModel::showAddItemOverlay
@@ -116,7 +112,6 @@ private fun PlaceholderTabScreen(
     title: String,
     currentTab: String,
     onInventoryClick: () -> Unit,
-    onListClick: () -> Unit,
     onRecipesClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onAddClick: () -> Unit = {}
@@ -139,7 +134,6 @@ private fun PlaceholderTabScreen(
             ShelfScanBottomBar(
                 currentTab = currentTab,
                 onInventoryClick = onInventoryClick,
-                onListClick = onListClick,
                 onRecipesClick = onRecipesClick,
                 onSettingsClick = onSettingsClick
             )
@@ -151,14 +145,10 @@ private fun PlaceholderTabScreen(
                 .padding(padding),
             contentAlignment = if (currentTab == "List") Alignment.TopStart else Alignment.Center
         ) {
-            if (currentTab == "List") {
-                ShoppingListScreen()
-            } else {
-                Text(
-                    text = "$title – Coming soon",
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
+            Text(
+                text = "$title – Coming soon",
+                modifier = Modifier.padding(16.dp)
+            )
         }
     }
 }
