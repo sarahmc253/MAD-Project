@@ -43,11 +43,11 @@ class PantryRepository(private val dao: PantryItemDao) {
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
-    fun generateItemID(): String {
+    private fun generateItemID(): String {
         return java.util.UUID.randomUUID().toString()
     }
 
-    fun updateItem(item: PantryModel, online: Boolean): Flow<FirebaseWriteResult> {
+    fun upsertItem(item: PantryModel, online: Boolean): Flow<FirebaseWriteResult> {
         val itemWithId = if (item.itemId != null) item else item.copy(itemId = generateItemID())
         val itemId = itemWithId.itemId!!
 
