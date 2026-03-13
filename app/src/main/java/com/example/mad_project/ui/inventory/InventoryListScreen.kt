@@ -102,15 +102,27 @@ fun InventoryListScreen(
                 placeholder = "Search ingredients..."
             )
             Spacer(modifier = Modifier.height(12.dp))
-            CategoryChips(
-                selected = selectedCategory,
-                onSelect = { selectedCategory = it }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            StatusFilterChips(
-                selected = statusFilter,
-                onSelect = { statusFilter = it }
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                FilterDropdown(
+                    modifier = Modifier.weight(1f),
+                    label = "Location",
+                    selected = selectedCategory,
+                    options = listOf("All", "Fridge", "Pantry", "Freezer"),
+                    onSelect = { selectedCategory = it }
+                )
+                FilterDropdown(
+                    modifier = Modifier.weight(1f),
+                    label = "Status",
+                    selected = statusFilter,
+                    options = listOf("All") + ExpiryStatus.entries.map { it.label },
+                    onSelect = { statusFilter = it }
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
             MyInventoryHeader(
                 viewMode = viewMode,
@@ -320,52 +332,53 @@ private fun SearchBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CategoryChips(selected: String, onSelect: (String) -> Unit) {
-    val categories = listOf("All", "Fridge", "Pantry", "Freezer")
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+private fun FilterDropdown(
+    modifier: Modifier = Modifier,
+    label: String,
+    selected: String,
+    options: List<String>,
+    onSelect: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
     ) {
-        categories.forEach { cat ->
-            FilterChip(
-                selected = selected == cat,
-                onClick = { onSelect(cat) },
-                label = { Text(cat) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = ShelfScanGreen,
-                    selectedLabelColor = Color.White,
-                    containerColor = ChipBg,
-                    labelColor = TextPrimary
+        OutlinedTextField(
+            value = selected,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label, fontSize = 12.sp) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = ShelfScanGreen,
+                unfocusedBorderColor = Color.LightGray,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option, color = if (option == selected) ShelfScanGreen else TextPrimary) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    }
                 )
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatusFilterChips(selected: String, onSelect: (String) -> Unit) {
-    val statuses = listOf("All") + ExpiryStatus.entries.map { it.label }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        statuses.forEach { status ->
-            FilterChip(
-                selected = selected == status,
-                onClick = { onSelect(status) },
-                label = { Text(status) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = ShelfScanGreen,
-                    selectedLabelColor = Color.White,
-                    containerColor = ChipBg,
-                    labelColor = TextPrimary
-                )
-            )
+            }
         }
     }
 }
@@ -522,6 +535,7 @@ private fun InventoryGridCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .height(160.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),

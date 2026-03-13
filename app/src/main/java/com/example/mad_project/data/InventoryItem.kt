@@ -21,7 +21,6 @@ data class InventoryItem(
     val notes: String? = null,
     val category: String? = null,
     val imageUrl: String? = null,
-    val inStock: Boolean = true,
     val firebaseId: String? = null
 )
 
@@ -57,11 +56,14 @@ fun PantryModel.toInventoryItem(): InventoryItem {
         firebaseId = itemId,
         name = foodName ?: "Unknown Item",
         quantity = quantity?.let { if (it == it.toInt().toFloat()) "${it.toInt()}" else "$it" } ?: "1",
-        location = ItemLocation.PANTRY,
+        location = ItemLocation.entries.firstOrNull { it.name == location } ?: ItemLocation.PANTRY,
         expiryStatus = expiryStatus,
         expiryDate = expiryDate ?: "",
         expiryDisplay = expiryDisplay,
-        purchasedDate = dateScanned
+        purchasedDate = dateScanned,
+        notes = notes,
+        category = category,
+        imageUrl = imageUrl
     )
 }
 
