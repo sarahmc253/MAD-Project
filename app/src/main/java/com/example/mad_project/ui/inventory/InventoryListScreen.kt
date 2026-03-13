@@ -49,7 +49,6 @@ private enum class ViewMode { LIST, GRID }
 fun InventoryListScreen(
     onAddClick: () -> Unit,
     onItemClick: (String) -> Unit,
-    onShoppingClick: () -> Unit,
     onRecipesClick: () -> Unit,
     onSettingsClick: () -> Unit,
     viewModel: InventoryViewModel = viewModel()
@@ -83,7 +82,6 @@ fun InventoryListScreen(
             ShelfScanBottomBar(
                 currentTab = "Inventory",
                 onInventoryClick = { },
-                onListClick = onShoppingClick,
                 onRecipesClick = onRecipesClick,
                 onSettingsClick = onSettingsClick
             )
@@ -636,7 +634,6 @@ private fun InventoryGridCard(
 fun ShelfScanBottomBar(
     currentTab: String,
     onInventoryClick: () -> Unit,
-    onListClick: () -> Unit,
     onRecipesClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
@@ -649,12 +646,6 @@ fun ShelfScanBottomBar(
             label = { Text("Inventory") },
             selected = currentTab == "Inventory",
             onClick = onInventoryClick
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null, modifier = Modifier.size(24.dp)) },
-            label = { Text("List") },
-            selected = currentTab == "List",
-            onClick = onListClick
         )
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Restaurant, contentDescription = null, modifier = Modifier.size(24.dp)) },
@@ -678,7 +669,6 @@ private fun InventoryListScreenPreview() {
         InventoryListScreen(
             onAddClick = {},
             onItemClick = {},
-            onShoppingClick = {},
             onRecipesClick = {},
             onSettingsClick = {}
         )
@@ -736,7 +726,6 @@ private fun ShelfScanBottomBarPreview() {
         ShelfScanBottomBar(
             currentTab = "Inventory",
             onInventoryClick = {},
-            onListClick = {},
             onRecipesClick = {},
             onSettingsClick = {}
         )
