@@ -35,7 +35,7 @@ private const val REPO_TAG = "PantryRepository"
  */
 class PantryRepository(private val dao: PantryItemDao) {
 
-    /** The UI always observes Room — never Firebase directly. */
+    /** The application always observes Room — never Firebase directly. */
     val pantryItems: Flow<List<PantryModel>> = dao.getAllItems()
         .map { entities -> entities.map { it.toPantryModel() } }
 
@@ -43,10 +43,13 @@ class PantryRepository(private val dao: PantryItemDao) {
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
-    fun addItem(item: PantryModel, online: Boolean): Flow<FirebaseWriteResult> {
-        // Generate the ID here so Room and Firebase always share the same key.
-        val itemId = java.util.UUID.randomUUID().toString()
-        val itemWithId = item.copy(itemId = itemId)
+    fun generateItemID(): String {
+        return java.util.UUID.randomUUID().toString()
+    }
+
+    fun updateItem(item: PantryModel, online: Boolean): Flow<FirebaseWriteResult> {
+        val itemWithId = if (item.itemId != null) item else item.copy(itemId = generateItemID())
+        val itemId = itemWithId.itemId!!
 
         return if (online) {
             writePantryItem(itemId, itemWithId)
@@ -57,38 +60,13 @@ class PantryRepository(private val dao: PantryItemDao) {
                         FirebaseWriteResult.Success ->
                             dao.upsertItem(itemWithId.toEntity(isSynced = true))
                         is FirebaseWriteResult.Error ->
-                            Log.e(REPO_TAG, "addItem Firebase error: ${result.message}")
-                    }
-                }
-        } else {
-            flow {
-                emit(FirebaseWriteResult.Loading)
-                dao.upsertItem(itemWithId.toEntity(isSynced = false))
-                emit(FirebaseWriteResult.Success)
-            }
-        }
-    }
-
-    fun updateItem(item: PantryModel, online: Boolean): Flow<FirebaseWriteResult> {
-        val itemId = item.itemId
-            ?: return flow { emit(FirebaseWriteResult.Error("Item has no ID")) }
-
-        return if (online) {
-            writePantryItem(itemId, item)
-                .onEach { result ->
-                    when (result) {
-                        FirebaseWriteResult.Loading ->
-                            dao.upsertItem(item.toEntity(isSynced = false))
-                        FirebaseWriteResult.Success ->
-                            dao.upsertItem(item.toEntity(isSynced = true))
-                        is FirebaseWriteResult.Error ->
                             Log.e(REPO_TAG, "updateItem Firebase error: ${result.message}")
                     }
                 }
         } else {
             flow {
                 emit(FirebaseWriteResult.Loading)
-                dao.upsertItem(item.toEntity(isSynced = false))
+                dao.upsertItem(itemWithId.toEntity(isSynced = false))
                 emit(FirebaseWriteResult.Success)
             }
         }
