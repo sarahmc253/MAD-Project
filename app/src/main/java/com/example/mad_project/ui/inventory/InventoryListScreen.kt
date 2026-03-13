@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
+import com.example.mad_project.ui.components.SyncLoadingOverlay
 import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.ui.theme.*
 import com.example.mad_project.ui.viewmodel.InventoryViewModel
@@ -66,6 +67,7 @@ fun InventoryListScreen(
     val expiringSoon = uiState.items.count { it.expiryStatus == ExpiryStatus.EXPIRES_SOON }
     val expired = uiState.items.count { it.expiryStatus == ExpiryStatus.EXPIRED }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         topBar = { ShelfScanTopBar(itemCount = uiState.items.size) },
         floatingActionButton = {
@@ -163,6 +165,11 @@ fun InventoryListScreen(
                 }
             }
         }
+    }
+
+    if (uiState.writeInProgress) {
+        SyncLoadingOverlay()
+    }
     }
 }
 

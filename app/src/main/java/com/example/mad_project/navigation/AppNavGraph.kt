@@ -8,7 +8,6 @@ import com.example.mad_project.ui.home.ShelfScanHomeScreen
 import com.example.mad_project.ui.login.LoginScreen
 import com.example.mad_project.ui.scanner.BarcodeScannerScreen
 import com.example.mad_project.ui.theme.MADProjectTheme
-
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
