@@ -1,16 +1,18 @@
 package com.example.mad_project.data
 
 import androidx.compose.ui.graphics.Color
+import com.example.mad_project.ui.theme.ChipBg
 import com.example.mad_project.ui.theme.ExpiredRed
 import com.example.mad_project.ui.theme.ExpiringSoonOrange
 import com.example.mad_project.ui.theme.TextPrimary
+import com.example.mad_project.ui.theme.TextSecondary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 //DUMMY DATA
 data class InventoryItem(
-    val id: Long,
+    val id: String,
     val name: String,
     val quantity: String,
     val location: ItemLocation,
@@ -52,11 +54,11 @@ fun PantryModel.toInventoryItem(): InventoryItem {
     }
 
     return InventoryItem(
-        id = itemId?.hashCode()?.toLong() ?: 0L,
+        id = itemId ?: "",
         firebaseId = itemId,
         name = foodName ?: "Unknown Item",
         quantity = quantity?.let { if (it == it.toInt().toFloat()) "${it.toInt()}" else "$it" } ?: "1",
-        location = ItemLocation.entries.firstOrNull { it.name == location } ?: ItemLocation.PANTRY,
+        location = ItemLocation.entries.firstOrNull { it.name == location } ?: ItemLocation.UNKNOWN,
         expiryStatus = expiryStatus,
         expiryDate = expiryDate ?: "",
         expiryDisplay = expiryDisplay,
@@ -70,7 +72,8 @@ fun PantryModel.toInventoryItem(): InventoryItem {
 enum class ItemLocation(val label: String, val chipBg: Color, val chipText: Color) {
     FRIDGE("FRIDGE", com.example.mad_project.ui.theme.FridgeBlue, com.example.mad_project.ui.theme.FridgeBlueText),
     PANTRY("PANTRY", com.example.mad_project.ui.theme.PantryYellow, com.example.mad_project.ui.theme.PantryYellowText),
-    FREEZER("FREEZER", com.example.mad_project.ui.theme.FreezerPurple, com.example.mad_project.ui.theme.FreezerPurpleText)
+    FREEZER("FREEZER", com.example.mad_project.ui.theme.FreezerPurple, com.example.mad_project.ui.theme.FreezerPurpleText),
+    UNKNOWN("UNKNOWN", ChipBg, TextSecondary)
 }
 
 enum class ExpiryStatus(val label: String, val colour: Color) {

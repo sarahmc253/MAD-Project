@@ -48,7 +48,7 @@ private enum class ViewMode { LIST, GRID }
 @Composable
 fun InventoryListScreen(
     onAddClick: () -> Unit,
-    onItemClick: (Long) -> Unit,
+    onItemClick: (String) -> Unit,
     onShoppingClick: () -> Unit,
     onRecipesClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -143,7 +143,6 @@ fun InventoryListScreen(
                         InventoryListRow(
                             item = item,
                             onClick = { onItemClick(item.id) },
-                            onMenuClick = { },
                             onDeleteClick = { item.firebaseId?.let { viewModel.deleteItem(it) } }
                         )
                     }
@@ -424,7 +423,6 @@ private fun MyInventoryHeader(
 private fun InventoryListRow(
     item: InventoryItem,
     onClick: () -> Unit,
-    onMenuClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -722,13 +720,6 @@ private fun SearchBarPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun CategoryChipsPreview() {
-    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
-        CategoryChips(selected = "All", onSelect = {})
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -745,7 +736,6 @@ private fun InventoryListRowPreview() {
         InventoryListRow(
             item = sampleInventoryItems().first(),
             onClick = {},
-            onMenuClick = {},
             onDeleteClick = {}
         )
     }
