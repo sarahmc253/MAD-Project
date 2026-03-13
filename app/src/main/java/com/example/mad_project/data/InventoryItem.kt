@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+//DUMMY DATA
 data class InventoryItem(
     val id: String,
     val name: String,

@@ -3,8 +3,8 @@ package com.example.mad_project.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
+import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.PantryRepository
 import com.example.mad_project.data.room.ShelfScanDatabase
 import com.example.mad_project.data.toInventoryItem
@@ -14,6 +14,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * UI state for the Inventory list screen.
+ * Ready to be backed by Room flow when local persistence is added.
+ */
 data class InventoryListUiState(
     val items: List<InventoryItem> = emptyList(),
     val searchQuery: String = "",

@@ -90,17 +90,9 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun addItem(item: PantryModel) {
+    fun upsertItem(item: PantryModel) {
         viewModelScope.launch {
-            repository.updateItem(item, isOnline.value).collect { result ->
-                handleWriteResult(result)
-            }
-        }
-    }
-
-    fun updateItem(item: PantryModel) {
-        viewModelScope.launch {
-            repository.updateItem(item, isOnline.value).collect { result ->
+            repository.upsertItem(item, isOnline.value).collect { result ->
                 handleWriteResult(result)
             }
         }

@@ -80,7 +80,7 @@ fun ShelfScanHomeScreen(
                 onBackClick = homeViewModel::hideAddItemOverlay,
                 onEnterManuallyClick = homeViewModel::hideAddItemOverlay,
                 onAddScannedItem = { name, expiryDate, quantity ->
-                    inventoryViewModel.updateItem(
+                    inventoryViewModel.upsertItem(
                         PantryModel(
                             foodName = name,
                             dateScanned = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
