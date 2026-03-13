@@ -40,7 +40,11 @@ fun InventoryListScreen(
     onItemClick: (Long) -> Unit,
     onShoppingClick: () -> Unit,
     onRecipesClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onAlertsClick: () -> Unit = {},
+    alertCount: Int = 0,
+    expiringSoonCount: Int = 0,
+    expiredCount: Int = 0,
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
@@ -51,7 +55,7 @@ fun InventoryListScreen(
         .filter { selectedCategory == "All" || it.location.name == selectedCategory.uppercase() }
 
     Scaffold(
-        topBar = { ShelfScanTopBar() },
+        topBar = { ShelfScanTopBar(onAlertsClick = onAlertsClick, alertCount = alertCount) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddClick,
@@ -77,7 +81,7 @@ fun InventoryListScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            SummaryCards(expiringSoon = 5, expired = 2)
+            SummaryCards(expiringSoon = expiringSoonCount, expired = expiredCount)
             Spacer(modifier = Modifier.height(16.dp))
             SearchBar(
                 query = searchQuery,
@@ -110,7 +114,7 @@ fun InventoryListScreen(
 }
 
 @Composable
-private fun ShelfScanTopBar() {
+private fun ShelfScanTopBar(onAlertsClick: () -> Unit, alertCount: Int) {
     Surface(
         modifier = Modifier.statusBarsPadding(),
         color = Color.White,
@@ -151,12 +155,14 @@ private fun ShelfScanTopBar() {
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { }) {
-                Icon(
-                    Icons.Default.Notifications,
-                    contentDescription = "Notifications",
-                    tint = TextSecondary
-                )
+            BadgedBox(badge = { if (alertCount > 0) Badge { Text("$alertCount") } }) {
+                IconButton(onClick = onAlertsClick) {
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = "Notifications",
+                        tint = TextSecondary
+                    )
+                }
             }
         }
     }
@@ -478,7 +484,7 @@ private fun InventoryListScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun ShelfScanTopBarPreview() {
-    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) { ShelfScanTopBar() }
+    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) { ShelfScanTopBar(onAlertsClick = {}, alertCount = 0) }
 }
 
 @Preview(showBackground = true)

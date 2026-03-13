@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,8 +38,10 @@ import com.example.mad_project.ui.theme.MADProjectTheme
  */
 @Composable
 fun ShelfScanHomeScreen(
-    pantryViewModel: PantryViewModel = viewModel()
+    pantryViewModel: PantryViewModel = viewModel(),
+    onAlertsClick: () -> Unit = {},
 ) {
+    val uiState by pantryViewModel.uiState.collectAsState()
     var currentTab by rememberSaveable { mutableStateOf("Inventory") }
     var addItemOverlay by rememberSaveable { mutableStateOf(false) }
     var detailItemId by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -51,7 +54,11 @@ fun ShelfScanHomeScreen(
                     onItemClick = { id: Long -> detailItemId = id },
                     onShoppingClick = { currentTab = "List" },
                     onRecipesClick = { currentTab = "Recipes" },
-                    onSettingsClick = { currentTab = "Settings" }
+                    onSettingsClick = { currentTab = "Settings" },
+                    onAlertsClick = onAlertsClick,
+                    alertCount = uiState.alertItems.size,
+                    expiringSoonCount = uiState.expiringSoonCount,
+                    expiredCount = uiState.expiredCount,
                 )
             }
             "List" -> PlaceholderTabScreen(

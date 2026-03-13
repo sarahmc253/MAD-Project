@@ -29,7 +29,10 @@ data class PantryUiState(
     val items: List<PantryModel> = emptyList(),
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
-    val writeInProgress: Boolean = false
+    val writeInProgress: Boolean = false,
+    val alertItems: List<PantryModel> = emptyList(),
+    val expiringSoonCount: Int = 0,
+    val expiredCount: Int = 0,
 )
 
 class PantryViewModel : ViewModel() {
@@ -40,13 +43,39 @@ class PantryViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             getPantry().collect { items ->
+                val (alertItems, expiringSoonCount, expiredCount) = computeAlerts(items)
                 _uiState.value = _uiState.value.copy(
                     items = items,
                     isLoading = false,
-                    errorMessage = null
+                    errorMessage = null,
+                    alertItems = alertItems,
+                    expiringSoonCount = expiringSoonCount,
+                    expiredCount = expiredCount,
                 )
             }
         }
+    }
+
+    // Items expiring within 48 hours of now (expiringSoon) or already past expiry (expired).
+    private fun computeAlerts(items: List<PantryModel>): Triple<List<PantryModel>, Int, Int> {
+        val now = System.currentTimeMillis()
+        val cutoffMillis = now + 48L * 60 * 60 * 1000
+        val fmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val expiringSoon = mutableListOf<PantryModel>()
+        val expired = mutableListOf<PantryModel>()
+
+        items.forEach { item ->
+            val expiryTime = item.expiryDate?.let {
+                runCatching { fmt.parse(it)?.time }.getOrNull()
+            } ?: return@forEach
+
+            when {
+                expiryTime < now -> expired.add(item)
+                expiryTime <= cutoffMillis -> expiringSoon.add(item)
+            }
+        }
+
+        return Triple(expiringSoon + expired, expiringSoon.size, expired.size)
     }
 
     fun addItem(item: PantryModel) {
