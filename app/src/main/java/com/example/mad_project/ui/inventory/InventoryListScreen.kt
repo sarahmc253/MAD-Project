@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.ItemLocation
@@ -50,20 +51,24 @@ fun InventoryListScreen(
     onItemClick: (Long) -> Unit,
     onShoppingClick: () -> Unit,
     onRecipesClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    viewModel: InventoryViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
     var statusFilter by remember { mutableStateOf("All") }
     var viewMode by remember { mutableStateOf(ViewMode.LIST) }
-    var items by remember { mutableStateOf(sampleInventoryItems()) }
-    val filteredItems = items
+    val filteredItems = uiState.items
         .filter { it.name.contains(searchQuery, ignoreCase = true) }
         .filter { selectedCategory == "All" || it.location.name == selectedCategory.uppercase() }
         .filter { statusFilter == "All" || it.expiryStatus.label == statusFilter }
 
+    val expiringSoon = uiState.items.count { it.expiryStatus == ExpiryStatus.EXPIRES_SOON }
+    val expired = uiState.items.count { it.expiryStatus == ExpiryStatus.EXPIRED }
+
     Scaffold(
-        topBar = { ShelfScanTopBar() },
+        topBar = { ShelfScanTopBar(itemCount = uiState.items.size) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddClick,
@@ -89,7 +94,7 @@ fun InventoryListScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            SummaryCards(expiringSoon = 5, expired = 2)
+            SummaryCards(expiringSoon = expiringSoon, expired = expired)
             Spacer(modifier = Modifier.height(16.dp))
             SearchBar(
                 query = searchQuery,
@@ -112,7 +117,11 @@ fun InventoryListScreen(
                 onViewModeChange = { viewMode = it }
             )
             Spacer(modifier = Modifier.height(8.dp))
-            if (viewMode == ViewMode.LIST) {
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = ShelfScanGreen)
+                }
+            } else if (viewMode == ViewMode.LIST) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -123,7 +132,7 @@ fun InventoryListScreen(
                             item = item,
                             onClick = { onItemClick(item.id) },
                             onMenuClick = { },
-                            onDeleteClick = { items = items.filter { it.id != item.id } }
+                            onDeleteClick = { item.firebaseId?.let { viewModel.deleteItem(it) } }
                         )
                     }
                 }
@@ -139,7 +148,7 @@ fun InventoryListScreen(
                         InventoryGridCard(
                             item = item,
                             onClick = { onItemClick(item.id) },
-                            onDeleteClick = { items = items.filter { it.id != item.id } }
+                            onDeleteClick = { item.firebaseId?.let { viewModel.deleteItem(it) } }
                         )
                     }
                 }
@@ -149,7 +158,7 @@ fun InventoryListScreen(
 }
 
 @Composable
-private fun ShelfScanTopBar() {
+private fun ShelfScanTopBar(itemCount: Int = 0) {
     Surface(
         modifier = Modifier.statusBarsPadding(),
         color = Color.White,
@@ -184,7 +193,7 @@ private fun ShelfScanTopBar() {
                     color = TextPrimary
                 )
                 Text(
-                    "Tracking ${sampleInventoryItems().size} items",
+                    "Tracking $itemCount items",
                     fontSize = 12.sp,
                     color = TextSecondary
                 )
