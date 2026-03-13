@@ -2,6 +2,7 @@ package com.example.mad_project.ui.item
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import com.example.mad_project.ui.components.LoadingView
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,9 +26,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.sampleInventoryItems
 import com.example.mad_project.ui.theme.*
+import com.example.mad_project.ui.viewmodel.ItemDetailViewModel
+import com.example.mad_project.ui.viewmodel.ItemDetailViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,10 +42,26 @@ fun ItemDetailsScreen(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onMarkConsumed: () -> Unit,
-    onRemoveFromPantry: () -> Unit
+    onRemoveFromPantry: () -> Unit,
+    viewModel: ItemDetailViewModel = viewModel(
+        key = "item_detail_$itemId",
+        factory = ItemDetailViewModelFactory(itemId)
+    )
 ) {
-    val item = sampleInventoryItems().find { it.id == itemId }
-        ?: sampleInventoryItems().first()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val item = uiState.item
+
+    if (uiState.isLoading) {
+        LoadingView()
+        return
+    }
+    val currentItem = item
+    if (currentItem == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Item not found", color = TextSecondary)
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -78,7 +100,7 @@ fun ItemDetailsScreen(
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color(0xFFE0E0E0))
             ) {
-                // Placeholder for image - could use Coil with item.imageUrl
+                // Placeholder for image - could use Coil with currentItem.imageUrl
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -125,7 +147,7 @@ fun ItemDetailsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    item.name,
+                    currentItem.name,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
@@ -168,7 +190,7 @@ fun ItemDetailsScreen(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            item.expiryDisplay,
+                            currentItem.expiryDisplay,
                             color = ExpiringSoonOrange,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
@@ -184,7 +206,7 @@ fun ItemDetailsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            item.category ?: item.location.label,
+                            currentItem.category ?: currentItem.location.label,
                             color = TextPrimary,
                             fontSize = 12.sp
                         )
@@ -203,7 +225,7 @@ fun ItemDetailsScreen(
                 DetailCard(
                     modifier = Modifier.weight(1f),
                     label = "EXPIRY DATE",
-                    value = item.expiryDate,
+                    value = currentItem.expiryDate,
                     actionLabel = "Change",
                     actionIcon = Icons.Default.CalendarToday,
                     onClick = { }
@@ -211,7 +233,7 @@ fun ItemDetailsScreen(
                 DetailCard(
                     modifier = Modifier.weight(1f),
                     label = "QUANTITY",
-                    value = item.quantity,
+                    value = currentItem.quantity,
                     actionLabel = "Adjust",
                     actionIcon = Icons.Default.Add,
                     onClick = { }
@@ -227,12 +249,12 @@ fun ItemDetailsScreen(
                 DetailCard(
                     modifier = Modifier.weight(1f),
                     label = "PURCHASED",
-                    value = item.purchasedDate ?: "—"
+                    value = currentItem.purchasedDate ?: "—"
                 )
                 DetailCard(
                     modifier = Modifier.weight(1f),
                     label = "LOCATION",
-                    value = item.location.label
+                    value = currentItem.location.label
                 )
             }
 
@@ -251,7 +273,7 @@ fun ItemDetailsScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    item.notes ?: "No notes.",
+                    currentItem.notes ?: "No notes.",
                     fontSize = 14.sp,
                     color = TextPrimary,
                     lineHeight = 20.sp

@@ -13,9 +13,17 @@ import com.example.mad_project.ui.theme.MADProjectTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShoppingListScreen() {
+fun ShoppingListScreen(
+    onBackClick: (() -> Unit)? = null
+) {
     Scaffold(
-        topBar = { AppTopBar(title = "Shopping List", showBack = true) }
+        topBar = {
+            AppTopBar(
+                title = "Shopping List",
+                showBack = true,
+                onBackClick = onBackClick
+            )
+        }
     ) { padding ->
         Box(
             modifier = Modifier
