@@ -13,17 +13,15 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.PantryModel
-import com.example.mad_project.ui.components.PantryViewModel
+import com.example.mad_project.ui.viewmodel.HomeViewModel
+import com.example.mad_project.ui.viewmodel.PantryViewModel
 import com.example.mad_project.ui.inventory.InventoryListScreen
 import com.example.mad_project.ui.inventory.ShelfScanBottomBar
 import com.example.mad_project.ui.item.AddItemScreen
@@ -37,56 +35,55 @@ import com.example.mad_project.ui.theme.MADProjectTheme
  */
 @Composable
 fun ShelfScanHomeScreen(
+    homeViewModel: HomeViewModel = viewModel(),
     pantryViewModel: PantryViewModel = viewModel()
 ) {
-    var currentTab by rememberSaveable { mutableStateOf("Inventory") }
-    var addItemOverlay by rememberSaveable { mutableStateOf(false) }
-    var detailItemId by rememberSaveable { mutableStateOf<Long?>(null) }
+    val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        when (currentTab) {
+        when (homeState.currentTab) {
             "Inventory" -> {
                 InventoryListScreen(
-                    onAddClick = { addItemOverlay = true },
-                    onItemClick = { id: Long -> detailItemId = id },
-                    onShoppingClick = { currentTab = "List" },
-                    onRecipesClick = { currentTab = "Recipes" },
-                    onSettingsClick = { currentTab = "Settings" }
+                    onAddClick = homeViewModel::showAddItemOverlay,
+                    onItemClick = homeViewModel::openItemDetail,
+                    onShoppingClick = { homeViewModel.setCurrentTab("List") },
+                    onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
+                    onSettingsClick = { homeViewModel.setCurrentTab("Settings") }
                 )
             }
             "List" -> PlaceholderTabScreen(
                 title = "List",
-                currentTab = currentTab,
-                onInventoryClick = { currentTab = "Inventory" },
-                onListClick = { currentTab = "List" },
-                onRecipesClick = { currentTab = "Recipes" },
-                onSettingsClick = { currentTab = "Settings" },
-                onAddClick = { addItemOverlay = true }
+                currentTab = homeState.currentTab,
+                onInventoryClick = { homeViewModel.setCurrentTab("Inventory") },
+                onListClick = { homeViewModel.setCurrentTab("List") },
+                onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
+                onSettingsClick = { homeViewModel.setCurrentTab("Settings") },
+                onAddClick = homeViewModel::showAddItemOverlay
             )
             "Recipes" -> PlaceholderTabScreen(
                 title = "Recipes",
-                currentTab = currentTab,
-                onInventoryClick = { currentTab = "Inventory" },
-                onListClick = { currentTab = "List" },
-                onRecipesClick = { currentTab = "Recipes" },
-                onSettingsClick = { currentTab = "Settings" },
-                onAddClick = { addItemOverlay = true }
+                currentTab = homeState.currentTab,
+                onInventoryClick = { homeViewModel.setCurrentTab("Inventory") },
+                onListClick = { homeViewModel.setCurrentTab("List") },
+                onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
+                onSettingsClick = { homeViewModel.setCurrentTab("Settings") },
+                onAddClick = homeViewModel::showAddItemOverlay
             )
             "Settings" -> PlaceholderTabScreen(
                 title = "Settings",
-                currentTab = currentTab,
-                onInventoryClick = { currentTab = "Inventory" },
-                onListClick = { currentTab = "List" },
-                onRecipesClick = { currentTab = "Recipes" },
-                onSettingsClick = { currentTab = "Settings" },
-                onAddClick = { addItemOverlay = true }
+                currentTab = homeState.currentTab,
+                onInventoryClick = { homeViewModel.setCurrentTab("Inventory") },
+                onListClick = { homeViewModel.setCurrentTab("List") },
+                onRecipesClick = { homeViewModel.setCurrentTab("Recipes") },
+                onSettingsClick = { homeViewModel.setCurrentTab("Settings") },
+                onAddClick = homeViewModel::showAddItemOverlay
             )
         }
 
-        if (addItemOverlay) {
+        if (homeState.addItemOverlayVisible) {
             AddItemScreen(
-                onBackClick = { addItemOverlay = false },
-                onEnterManuallyClick = { addItemOverlay = false },
+                onBackClick = homeViewModel::hideAddItemOverlay,
+                onEnterManuallyClick = homeViewModel::hideAddItemOverlay,
                 onAddScannedItem = { name, expiryDate, quantity ->
                     pantryViewModel.addItem(
                         PantryModel(
@@ -96,19 +93,19 @@ fun ShelfScanHomeScreen(
                             quantity = quantity
                         )
                     )
-                    addItemOverlay = false
+                    homeViewModel.hideAddItemOverlay()
                 }
             )
         }
 
-        detailItemId?.let { id ->
+        homeState.detailItemId?.let { id ->
             ItemDetailsScreen(
                 itemId = id,
-                onBackClick = { detailItemId = null },
-                onEditClick = { detailItemId = null },
-                onDeleteClick = { detailItemId = null },
-                onMarkConsumed = { detailItemId = null },
-                onRemoveFromPantry = { detailItemId = null }
+                onBackClick = homeViewModel::closeItemDetail,
+                onEditClick = homeViewModel::closeItemDetail,
+                onDeleteClick = homeViewModel::closeItemDetail,
+                onMarkConsumed = homeViewModel::closeItemDetail,
+                onRemoveFromPantry = homeViewModel::closeItemDetail
             )
         }
     }

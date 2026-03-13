@@ -1,4 +1,4 @@
-package com.example.mad_project.ui.components
+package com.example.mad_project.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,19 +11,12 @@ import com.example.mad_project.data.writePantryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.collections.emptyList
 
 /**
- * Sources:
- * https://developer.android.com/topic/libraries/architecture/viewmodel
- *
- * We chose to use a ViewModel because it looked like a good and simple way to manage
- * coroutines for realtime firebase operations.
- *
- * prompt: Use this guide https://developer.android.com/topic/libraries/architecture/viewmodel to
- * implement a simple ViewModel that performs crud operations on a firebase database. The attached files
- * show the relevant functions and models to use.
+ * ViewModel for pantry/shopping list data (Firebase Realtime Database).
+ * Follows Android app architecture: UI state in ViewModel, data operations via repository layer.
  */
 data class PantryUiState(
     val items: List<PantryModel> = emptyList(),
@@ -110,6 +103,12 @@ class PantryViewModel : ViewModel() {
                     }
                 }
             }
+        }
+    }
+
+    fun clearError() {
+        _uiState.update { state ->
+            state.copy(errorMessage = null)
         }
     }
 }

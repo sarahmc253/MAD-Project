@@ -41,6 +41,7 @@ import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.data.sampleInventoryItems
 import com.example.mad_project.ui.theme.*
+import com.example.mad_project.ui.inventory.InventoryViewModel
 
 private enum class ViewMode { LIST, GRID }
 
