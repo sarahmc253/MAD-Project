@@ -49,8 +49,17 @@ import com.example.mad_project.ui.viewmodel.AddItemViewModel
 import java.util.concurrent.Executors
 
 /**
- * Add Item screen with live camera and barcode scanning. State and product lookup
- * are handled by AddItemViewModel; camera setup remains in the composable.
+ * Sources: CameraX (Preview + ImageAnalysis), bindToLifecycle(lifecycleOwner),
+ * ActivityResultContracts.RequestPermission, Settings.ACTION_APPLICATION_DETAILS_SETTINGS.
+ *
+ * Add Item screen with live camera and barcode scanning. On scan, looks up product via
+ * Open Food Facts and shows name/brand. Tap Add opens edit-details dialog (name, expiry, quantity);
+ * Enter Manually opens the same dialog with empty name. Camera permission: if denied, show
+ * Open Settings button to deep-link to app permissions. Callback passes (name, expiryDate, quantity)
+ * to add to pantry.
+ *
+ * Prompt: Wire Add Item to camera and Open Food Facts; add edit-details dialog before adding;
+ * allow manual add; add Open Settings when camera permission denied.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

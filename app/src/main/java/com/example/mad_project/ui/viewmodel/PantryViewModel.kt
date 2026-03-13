@@ -11,6 +11,7 @@ import com.example.mad_project.data.writePantryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -106,6 +107,8 @@ class PantryViewModel : ViewModel() {
     }
 
     fun clearError() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
+        _uiState.update { state ->
+            state.copy(errorMessage = null)
+        }
     }
 }

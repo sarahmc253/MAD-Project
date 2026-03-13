@@ -36,6 +36,12 @@ class AddItemViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(AddItemUiState())
     val uiState: StateFlow<AddItemUiState> = _uiState.asStateFlow()
 
+    /**
+     * AI-generated. viewModelScope.launch + _uiState.update + withContext(Dispatchers.IO) for
+     * fetchProductByBarcode keeps network work off the main thread and updates state atomically.
+     *
+     * Prompt: Handle barcode scan and Open Food Facts lookup in ViewModel.
+     */
     fun onBarcodeScanned(barcode: String) {
         if (barcode.isBlank()) return
         viewModelScope.launch {
@@ -95,7 +101,12 @@ class AddItemViewModel : ViewModel() {
         }
     }
 
-    /** Returns (name, expiryOrNull, quantity) for the current dialog values. */
+    /**
+     * AI-generated. Returns (name, expiryOrNull, quantity). Triple is used to pass multiple
+     * values from the dialog to the add callback.
+     *
+     * Prompt: Read dialog state and return values for add.
+     */
     fun getDialogValuesForAdd(): Triple<String, String?, Float> {
         val s = _uiState.value
         val name = s.dialogName.trim().ifBlank { "Manual item" }

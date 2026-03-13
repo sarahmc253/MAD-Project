@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 data class HomeUiState(
     val currentTab: String = "Inventory",
     val addItemOverlayVisible: Boolean = false,
-    val detailItemId: Long? = null
+    val detailItemId: String? = null
 )
 
 /**
@@ -35,7 +35,7 @@ class HomeViewModel : ViewModel() {
         _uiState.update { it.copy(addItemOverlayVisible = false) }
     }
 
-    fun openItemDetail(itemId: Long) {
+    fun openItemDetail(itemId: String) {
         _uiState.update { it.copy(detailItemId = itemId) }
     }
 

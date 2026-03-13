@@ -20,7 +20,7 @@ data class ItemDetailUiState(
 )
 
 class ItemDetailViewModel(
-    private val itemId: Long
+    private val itemId: String
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ItemDetailUiState())
@@ -34,7 +34,17 @@ class ItemDetailViewModel(
     }
 }
 
-class ItemDetailViewModelFactory(private val itemId: Long) : ViewModelProvider.Factory {
+class ItemDetailViewModelFactory(private val itemId: String) : ViewModelProvider.Factory {
+
+    /**
+     * AI-generated. ViewModelProvider.Factory is required when a ViewModel has constructor
+     * parameters; the generic create(modelClass): T and unchecked cast are boilerplate the
+     * compiler cannot verify.
+     *
+     * Sources: https://developer.android.com/topic/libraries/architecture/viewmodel#viewmodel-with-parameters
+     *
+     * Prompt: Factory so ItemDetailViewModel can be created with itemId in Compose.
+     */
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = ItemDetailViewModel(itemId) as T
 }
