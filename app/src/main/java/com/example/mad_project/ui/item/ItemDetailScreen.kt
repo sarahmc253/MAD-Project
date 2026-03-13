@@ -31,7 +31,7 @@ import com.example.mad_project.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemDetailsScreen(
-    itemId: Long,
+    itemId: String,
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -299,7 +299,7 @@ fun ItemDetailsScreen(
 private fun ItemDetailsScreenPreview() {
     com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
         ItemDetailsScreen(
-            itemId = 1L,
+            itemId = "",
             onBackClick = {},
             onEditClick = {},
             onDeleteClick = {},
