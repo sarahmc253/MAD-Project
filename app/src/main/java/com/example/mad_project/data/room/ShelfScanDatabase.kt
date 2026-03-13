@@ -27,7 +27,7 @@ abstract class ShelfScanDatabase : RoomDatabase() {
                 Room.databaseBuilder(
                     context.applicationContext,
                     ShelfScanDatabase::class.java,
-                    "nugget_db"
+                    "shelfscan_db"
                 ).build().also { INSTANCE = it }
             }
     }
