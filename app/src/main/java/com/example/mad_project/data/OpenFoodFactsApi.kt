@@ -7,7 +7,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 private const val BASE_URL = "https://world.openfoodfacts.net/api/v2/product"
-private const val FIELDS = "product_name,brands,generic_name"
+// Include language-specific names; API often returns name only in product_name_en / product_name_fr
+private const val FIELDS = "product_name,product_name_en,product_name_fr,brands,generic_name"
+
+private fun firstNonBlank(vararg values: String): String? =
+    values.firstOrNull { it.isNotBlank() }
 
 /**
  * Sources: https://world.openfoodfacts.net/api/v2/product,
@@ -31,9 +35,15 @@ suspend fun fetchProductByBarcode(barcode: String): OpenFoodFactsProduct? = with
             val root = JSONObject(body)
             if (root.optInt("status", 0) != 1) return@withContext null
             val product = root.optJSONObject("product") ?: return@withContext null
+            val productName = firstNonBlank(
+                product.optString("product_name"),
+                product.optString("product_name_en"),
+                product.optString("product_name_fr"),
+                product.optString("generic_name")
+            )
             OpenFoodFactsProduct(
                 barcode = root.optString("code", barcode),
-                productName = product.optString("product_name").takeIf { it.isNotBlank() },
+                productName = productName,
                 brands = product.optString("brands").takeIf { it.isNotBlank() },
                 genericName = product.optString("generic_name").takeIf { it.isNotBlank() }
             )
