@@ -13,7 +13,7 @@ import androidx.room.RoomDatabase
  *
  * Prompt: "Create a Room RoomDatabase singleton class for an Android app with one entity."
  */
-@Database(entities = [PantryItemEntity::class], version = 2, exportSchema = false)
+@Database(entities = [PantryItemEntity::class], version = 3, exportSchema = false)
 abstract class ShelfScanDatabase : RoomDatabase() {
 
     abstract fun pantryItemDao(): PantryItemDao

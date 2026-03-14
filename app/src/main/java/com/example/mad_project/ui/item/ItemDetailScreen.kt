@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -190,7 +189,14 @@ fun ItemDetailsScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {},
+                actions = {
+                    IconButton(onClick = {
+                        currentItem.firebaseId?.let { viewModel.deleteItem(it) }
+                        onDeleteClick()
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = ExpiredRed)
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorScheme.surface,
                     titleContentColor = colorScheme.onSurface,
@@ -207,40 +213,6 @@ fun ItemDetailsScreen(
                 .background(colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(colorScheme.surfaceVariant)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = colorScheme.onSurfaceVariant
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        currentItem.firebaseId?.let { viewModel.deleteItem(it) }
-                        onDeleteClick()
-                    },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(12.dp)
-                        .size(44.dp)
-                        .background(ExpiredRedLight, androidx.compose.foundation.shape.CircleShape)
-                ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = ExpiredRed)
-                }
-            }
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

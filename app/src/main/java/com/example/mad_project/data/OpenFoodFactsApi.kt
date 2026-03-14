@@ -7,7 +7,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 private const val BASE_URL = "https://world.openfoodfacts.net/api/v2/product"
-private const val FIELDS = "product_name,brands,image_url,generic_name"
+private const val FIELDS = "product_name,brands,generic_name"
 
 /**
  * Sources: https://world.openfoodfacts.net/api/v2/product,
@@ -35,7 +35,6 @@ suspend fun fetchProductByBarcode(barcode: String): OpenFoodFactsProduct? = with
                 barcode = root.optString("code", barcode),
                 productName = product.optString("product_name").takeIf { it.isNotBlank() },
                 brands = product.optString("brands").takeIf { it.isNotBlank() },
-                imageUrl = product.optString("image_url").takeIf { it.isNotBlank() },
                 genericName = product.optString("generic_name").takeIf { it.isNotBlank() }
             )
         } finally {

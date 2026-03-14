@@ -12,8 +12,7 @@ data class PantryModel(
     val foodName: String? = null,
     val expiryDate: String? = null,
     val quantity: Float? = null,
-    val location: String? = null,
-    val imageUrl: String? = null
+    val location: String? = null
 )
 
 fun getPantry(): Flow<List<PantryModel>> {
