@@ -23,14 +23,68 @@ import java.util.Locale
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+internal fun ExpiryPickerDialog(
+    show: Boolean,
+    currentExpiry: String,
+    onDismiss: () -> Unit,
+    onExpiryChange: (String) -> Unit
+) {
+    if (!show) return
+    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    val initialMillis = runCatching {
+        currentExpiry.trim().takeIf { it.isNotBlank() }?.let { dateFormatter.parse(it)?.time }
+    }.getOrNull() ?: Calendar.getInstance().timeInMillis
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialMillis,
+        yearRange = (Calendar.getInstance().get(Calendar.YEAR) - 1)..(Calendar.getInstance().get(Calendar.YEAR) + 10)
+    )
+    val datePickerColors = DatePickerDefaults.colors(
+        containerColor = Color.White,
+        titleContentColor = Color.Black,
+        headlineContentColor = Color.Black,
+        weekdayContentColor = Color.Black,
+        subheadContentColor = Color.Black,
+        navigationContentColor = Color.Black,
+        yearContentColor = Color.Black,
+        disabledYearContentColor = Color.Gray,
+        currentYearContentColor = Color.Black,
+        selectedYearContentColor = Color.White,
+        dayContentColor = Color.Black,
+        disabledDayContentColor = Color.Gray,
+        selectedDayContentColor = Color.White,
+        todayContentColor = Color.Black,
+        todayDateBorderColor = Color.Black
+    )
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        colors = datePickerColors,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        onExpiryChange(dateFormatter.format(Date(millis)))
+                    }
+                    onDismiss()
+                }
+            ) { Text("OK", color = ShelfScanGreen) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Black) }
+        }
+    ) {
+        DatePicker(state = datePickerState, colors = datePickerColors, showModeToggle = false)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 internal fun ExpiryDatePicker(
     expiry: String,
     onExpiryChange: (String) -> Unit,
-    textFieldColors: TextFieldColors,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldColors: TextFieldColors? = null
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
-    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     val colorScheme = MaterialTheme.colorScheme
 
     Box(modifier = modifier.fillMaxWidth()) {
@@ -45,62 +99,15 @@ internal fun ExpiryDatePicker(
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = textFieldColors
+            colors = textFieldColors ?: OutlinedTextFieldDefaults.colors()
         )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable { showDatePicker = true }
-        )
+        Box(modifier = Modifier.matchParentSize().clickable { showDatePicker = true })
     }
 
-    if (showDatePicker) {
-        val initialMillis = runCatching {
-            expiry.trim().takeIf { it.isNotBlank() }?.let { dateFormatter.parse(it)?.time }
-        }.getOrNull() ?: Calendar.getInstance().timeInMillis
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = initialMillis,
-            yearRange = (Calendar.getInstance().get(Calendar.YEAR) - 1)..(Calendar.getInstance().get(Calendar.YEAR) + 10)
-        )
-        val datePickerColors = DatePickerDefaults.colors(
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
-            headlineContentColor = Color.Black,
-            weekdayContentColor = Color.Black,
-            subheadContentColor = Color.Black,
-            navigationContentColor = Color.Black,
-            yearContentColor = Color.Black,
-            disabledYearContentColor = Color.Gray,
-            currentYearContentColor = Color.Black,
-            selectedYearContentColor = Color.White,
-            dayContentColor = Color.Black,
-            disabledDayContentColor = Color.Gray,
-            selectedDayContentColor = Color.White,
-            todayContentColor = Color.Black,
-            todayDateBorderColor = Color.Black
-        )
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            colors = datePickerColors,
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            onExpiryChange(dateFormatter.format(Date(millis)))
-                        }
-                        showDatePicker = false
-                    }
-                ) {
-                    Text("OK", color = ShelfScanGreen)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel", color = Color.Black)
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState, colors = datePickerColors, showModeToggle = false)
-        }
-    }
+    ExpiryPickerDialog(
+        show = showDatePicker,
+        currentExpiry = expiry,
+        onDismiss = { showDatePicker = false },
+        onExpiryChange = onExpiryChange
+    )
 }
