@@ -10,12 +10,9 @@ val PANTRY_REF_PATH = "foodItems"
 data class PantryModel(
     val itemId: String? = null,
     val foodName: String? = null,
-    val dateScanned: String? = null,
     val expiryDate: String? = null,
     val quantity: Float? = null,
     val location: String? = null,
-    val notes: String? = null,
-    val category: String? = null,
     val imageUrl: String? = null
 )
 

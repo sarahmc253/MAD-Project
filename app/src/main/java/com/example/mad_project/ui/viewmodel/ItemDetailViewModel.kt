@@ -93,8 +93,6 @@ class ItemDetailViewModel(
         expiryDate = expiryDate,
         quantity = quantity,
         location = location,
-        notes = notes,
-        category = category,
         imageUrl = imageUrl
     )
 

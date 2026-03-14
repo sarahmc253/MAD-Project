@@ -308,7 +308,7 @@ fun ItemDetailsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            currentItem.category ?: currentItem.location.label,
+                            currentItem.location.label,
                             color = TextPrimary,
                             fontSize = 12.sp
                         )
@@ -369,11 +369,6 @@ fun ItemDetailsScreen(
             ) {
                 DetailCard(
                     modifier = Modifier.weight(1f),
-                    label = "PURCHASED",
-                    value = currentItem.purchasedDate ?: "—"
-                )
-                DetailCard(
-                    modifier = Modifier.weight(1f),
                     label = "LOCATION",
                     value = currentItem.location.label,
                     actionLabel = "Change",
@@ -382,27 +377,6 @@ fun ItemDetailsScreen(
                         locationState = currentItem.location
                         showLocationDialog = true
                     }
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 20.dp)
-            ) {
-                Text(
-                    "NOTES",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextSecondary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    currentItem.notes ?: "No notes.",
-                    fontSize = 14.sp,
-                    color = TextPrimary,
-                    lineHeight = 20.sp
                 )
             }
 

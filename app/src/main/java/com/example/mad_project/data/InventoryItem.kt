@@ -19,9 +19,6 @@ data class InventoryItem(
     val expiryStatus: ExpiryStatus,
     val expiryDate: String,
     val expiryDisplay: String, // e.g. "Expired 2d ago", "Expires Tomorrow", "Expires in 6 days"
-    val purchasedDate: String? = null,
-    val notes: String? = null,
-    val category: String? = null,
     val imageUrl: String? = null,
     val firebaseId: String? = null
 )
@@ -62,9 +59,6 @@ fun PantryModel.toInventoryItem(): InventoryItem {
         expiryStatus = expiryStatus,
         expiryDate = expiryDate ?: "",
         expiryDisplay = expiryDisplay,
-        purchasedDate = dateScanned,
-        notes = notes,
-        category = category,
         imageUrl = imageUrl
     )
 }
