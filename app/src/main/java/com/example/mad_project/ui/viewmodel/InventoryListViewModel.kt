@@ -2,9 +2,10 @@ package com.example.mad_project.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.ExpiryStatus
-import com.example.mad_project.data.sampleInventoryItems
+import com.example.mad_project.data.InventoryItem
+import com.example.mad_project.data.getPantry
+import com.example.mad_project.data.toInventoryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,15 +41,16 @@ class InventoryListViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            val all = sampleInventoryItems()
-            val (expiringSoon, expired) = computeCounts(all)
-
-            _uiState.update { state ->
-                state.copy(
-                    items = all,
-                    expiringSoonCount = expiringSoon,
-                    expiredCount = expired
-                )
+            getPantry().collect { pantryItems ->
+                val all = pantryItems.map { it.toInventoryItem() }
+                val (expiringSoon, expired) = computeCounts(all)
+                _uiState.update { state ->
+                    state.copy(
+                        items = all,
+                        expiringSoonCount = expiringSoon,
+                        expiredCount = expired
+                    )
+                }
             }
         }
     }

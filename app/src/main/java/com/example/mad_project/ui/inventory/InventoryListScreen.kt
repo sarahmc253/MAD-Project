@@ -39,7 +39,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.ItemLocation
-import com.example.mad_project.data.sampleInventoryItems
 import com.example.mad_project.ui.theme.*
 import com.example.mad_project.ui.inventory.InventoryViewModel
 
@@ -727,38 +726,6 @@ private fun SearchBarPreview() {
 private fun MyInventoryHeaderPreview() {
     com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
         MyInventoryHeader(viewMode = ViewMode.LIST, onViewModeChange = {})
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun InventoryListRowPreview() {
-    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
-        InventoryListRow(
-            item = sampleInventoryItems().first(),
-            onClick = {},
-            onDeleteClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun InventoryGridCardPreview() {
-    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(modifier = Modifier.weight(1f)) {
-                InventoryGridCard(item = sampleInventoryItems()[0], onClick = {}, onDeleteClick = {})
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                InventoryGridCard(item = sampleInventoryItems()[1], onClick = {}, onDeleteClick = {})
-            }
-        }
     }
 }
 

@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.InventoryItem
-import com.example.mad_project.data.sampleInventoryItems
 import com.example.mad_project.ui.theme.*
 import com.example.mad_project.ui.viewmodel.ItemDetailViewModel
 import com.example.mad_project.ui.viewmodel.ItemDetailViewModelFactory

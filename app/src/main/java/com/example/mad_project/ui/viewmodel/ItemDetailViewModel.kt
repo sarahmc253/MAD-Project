@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.mad_project.data.InventoryItem
-import com.example.mad_project.data.sampleInventoryItems
+import com.example.mad_project.data.getPantry
+import com.example.mad_project.data.toInventoryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,8 +29,10 @@ class ItemDetailViewModel(
 
     init {
         viewModelScope.launch {
-            val item = sampleInventoryItems().find { it.id == itemId } ?: sampleInventoryItems().firstOrNull()
-            _uiState.update { it.copy(item = item, isLoading = false) }
+            getPantry().collect { pantryItems ->
+                val item = pantryItems.map { it.toInventoryItem() }.find { it.id == itemId }
+                _uiState.update { it.copy(item = item, isLoading = false) }
+            }
         }
     }
 }

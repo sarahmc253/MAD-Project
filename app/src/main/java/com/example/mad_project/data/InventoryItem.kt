@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-//DUMMY DATA
 data class InventoryItem(
     val id: String,
     val name: String,
@@ -81,12 +80,3 @@ enum class ExpiryStatus(val label: String, val colour: Color) {
     EXPIRES_SOON("Expires Soon", ExpiringSoonOrange),
     OK("OK", TextPrimary)
 }
-
-fun sampleInventoryItems(): List<InventoryItem> = listOf(
-    InventoryItem(1L, "Organic Milk", "1L", ItemLocation.FRIDGE, ExpiryStatus.EXPIRED, "Oct 21, 2023", "Expired 2d ago", "Oct 10, 2023", category = "Dairy"),
-    InventoryItem(2L, "Baby Spinach", "250g", ItemLocation.FRIDGE, ExpiryStatus.EXPIRES_SOON, "Oct 24, 2023", "Expires Tomorrow", "Oct 20, 2023", category = "Produce"),
-    InventoryItem(3L, "Whole Grain Bread", "1 loaf", ItemLocation.PANTRY, ExpiryStatus.OK, "Oct 29, 2023", "Expires in 6 days", "Oct 18, 2023", category = "Bakery"),
-    InventoryItem(4L, "Frozen Mixed Berries", "500g", ItemLocation.FREEZER, ExpiryStatus.OK, "Jan 24, 2024", "Expires in 3 months", "Jul 24, 2023", category = "Frozen"),
-    InventoryItem(5L, "Espresso Beans", "1kg", ItemLocation.PANTRY, ExpiryStatus.OK, "Nov 16, 2023", "Expires in 24 days", "Oct 23, 2022", category = "Pantry"),
-    InventoryItem(6L, "Greek Yogurt", "500g / 1 pack", ItemLocation.FRIDGE, ExpiryStatus.EXPIRES_SOON, "Oct 24, 2023", "Expiring in 5 days", "Oct 10, 2023", notes = "Unopened. Great for smoothies and morning breakfast bowls. Keep chilled at all times.", category = "Dairy")
-)
