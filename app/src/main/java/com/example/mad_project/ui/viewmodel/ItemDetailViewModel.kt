@@ -1,13 +1,13 @@
 package com.example.mad_project.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.mad_project.ShelfScanApplication
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.PantryRepository
-import com.example.mad_project.data.room.ShelfScanDatabase
 import com.example.mad_project.data.toInventoryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,12 +25,8 @@ data class ItemDetailUiState(
 
 class ItemDetailViewModel(
     private val itemId: String,
-    application: Application
-) : AndroidViewModel(application) {
-
-    private val repository: PantryRepository = PantryRepository(
-        ShelfScanDatabase.getInstance(application).pantryItemDao()
-    )
+    private val repository: PantryRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ItemDetailUiState())
     val uiState: StateFlow<ItemDetailUiState> = _uiState.asStateFlow()
@@ -43,23 +39,14 @@ class ItemDetailViewModel(
             }
         }
     }
-}
 
-class ItemDetailViewModelFactory(
-    private val itemId: String,
-    private val application: Application
-) : ViewModelProvider.Factory {
-
-    /**
-     * AI-generated. ViewModelProvider.Factory is required when a ViewModel has constructor
-     * parameters; the generic create(modelClass): T and unchecked cast are boilerplate the
-     * compiler cannot verify.
-     *
-     * Sources: https://developer.android.com/topic/libraries/architecture/viewmodel#viewmodel-with-parameters
-     *
-     * Prompt: Factory so ItemDetailViewModel can be created with itemId in Compose.
-     */
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T =
-        ItemDetailViewModel(itemId, application) as T
+    companion object {
+        fun factory(itemId: String): ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val repository =
+                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as ShelfScanApplication).repository
+                ItemDetailViewModel(itemId, repository)
+            }
+        }
+    }
 }

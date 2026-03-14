@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.mad_project.data.FirebaseWriteResult
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.PantryModel
+import com.example.mad_project.ShelfScanApplication
 import com.example.mad_project.data.PantryRepository
 import com.example.mad_project.data.networkConnectivityFlow
-import com.example.mad_project.data.room.ShelfScanDatabase
 import com.example.mad_project.data.toInventoryItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,9 +47,7 @@ data class InventoryUiState(
 
 class InventoryViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: PantryRepository = PantryRepository(
-        ShelfScanDatabase.getInstance(application).pantryItemDao()
-    )
+    private val repository: PantryRepository = (application as ShelfScanApplication).repository
 
     private val _uiState = MutableStateFlow(InventoryUiState())
     val uiState: StateFlow<InventoryUiState> = _uiState.asStateFlow()
