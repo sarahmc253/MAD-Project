@@ -47,22 +47,12 @@ fun ItemDetailsScreen(
     val item = uiState.item
 
     var expiryState by remember(item?.expiryDate) { mutableStateOf(item?.expiryDate ?: "") }
+    var showExpiryPicker by remember { mutableStateOf(false) }
     var showQuantityDialog by remember { mutableStateOf(false) }
     var quantityInput by remember { mutableStateOf("") }
     var showLocationDialog by remember { mutableStateOf(false) }
     var locationState by remember(item?.location) { mutableStateOf(item?.location ?: ItemLocation.PANTRY) }
     val colorScheme = MaterialTheme.colorScheme
-    val expiryTextFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = colorScheme.onSurfaceVariant,
-        unfocusedTextColor = colorScheme.onSurfaceVariant,
-        focusedBorderColor = colorScheme.outline,
-        unfocusedBorderColor = colorScheme.outline,
-        focusedContainerColor = colorScheme.surfaceVariant,
-        unfocusedContainerColor = colorScheme.surfaceVariant,
-        cursorColor = colorScheme.primary,
-        focusedLabelColor = colorScheme.onSurfaceVariant,
-        unfocusedLabelColor = colorScheme.onSurfaceVariant
-    )
 
     if (uiState.isLoading) {
         LoadingView()
@@ -126,6 +116,16 @@ fun ItemDetailsScreen(
             }
         )
     }
+
+    ExpiryPickerDialog(
+        show = showExpiryPicker,
+        currentExpiry = expiryState,
+        onDismiss = { showExpiryPicker = false },
+        onExpiryChange = {
+            expiryState = it
+            viewModel.updateExpiryDate(it)
+        }
+    )
 
     if (showQuantityDialog) {
         val textFieldColors = OutlinedTextFieldDefaults.colors(
@@ -253,7 +253,8 @@ fun ItemDetailsScreen(
                     currentItem.name,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = TextPrimary,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
                 )
                 Surface(
                     shape = RoundedCornerShape(8.dp),
@@ -301,15 +302,15 @@ fun ItemDetailsScreen(
                 }
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = ChipBg
+                    color = currentItem.location.chipBg
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            currentItem.category ?: currentItem.location.label,
-                            color = TextPrimary,
+                            currentItem.location.label,
+                            color = currentItem.location.chipText,
                             fontSize = 12.sp
                         )
                     }
@@ -323,31 +324,14 @@ fun ItemDetailsScreen(
                     .padding(top = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Card(
+                DetailCard(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outline)
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            "EXPIRY DATE",
-                            fontSize = 10.sp,
-                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        ExpiryDatePicker(
-                            expiry = expiryState,
-                            onExpiryChange = {
-                                expiryState = it
-                                viewModel.updateExpiryDate(it)
-                            },
-                            textFieldColors = expiryTextFieldColors
-                        )
-                    }
-                }
+                    label = "EXPIRY DATE",
+                    value = expiryState.ifBlank { "—" },
+                    actionLabel = "Adjust",
+                    actionIcon = Icons.Default.CalendarToday,
+                    onClick = { showExpiryPicker = true }
+                )
                 DetailCard(
                     modifier = Modifier.weight(1f),
                     label = "QUANTITY",
@@ -369,11 +353,6 @@ fun ItemDetailsScreen(
             ) {
                 DetailCard(
                     modifier = Modifier.weight(1f),
-                    label = "PURCHASED",
-                    value = currentItem.purchasedDate ?: "—"
-                )
-                DetailCard(
-                    modifier = Modifier.weight(1f),
                     label = "LOCATION",
                     value = currentItem.location.label,
                     actionLabel = "Change",
@@ -382,27 +361,6 @@ fun ItemDetailsScreen(
                         locationState = currentItem.location
                         showLocationDialog = true
                     }
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 20.dp)
-            ) {
-                Text(
-                    "NOTES",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextSecondary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    currentItem.notes ?: "No notes.",
-                    fontSize = 14.sp,
-                    color = TextPrimary,
-                    lineHeight = 20.sp
                 )
             }
 

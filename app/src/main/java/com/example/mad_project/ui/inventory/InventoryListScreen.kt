@@ -225,7 +225,6 @@ fun InventoryListScreen(
                 viewModel.upsertItem(
                     PantryModel(
                         foodName = name,
-                        dateScanned = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
                         expiryDate = expiry,
                         quantity = qty,
                         location = addDialogLocation.name
