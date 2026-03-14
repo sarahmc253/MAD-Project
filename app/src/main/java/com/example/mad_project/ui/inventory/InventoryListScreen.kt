@@ -80,10 +80,13 @@ fun InventoryListScreen(
     viewModel: InventoryViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("All") }
-    var statusFilter by remember { mutableStateOf("All") }
-    var viewMode by remember { mutableStateOf(ViewMode.LIST) }
+    val searchQuery = uiState.searchQuery
+    val selectedCategory = uiState.selectedCategory
+    val statusFilter = uiState.statusFilter
+    val viewMode = when (uiState.viewMode) {
+        "GRID" -> ViewMode.GRID
+        else -> ViewMode.LIST
+    }
     var showAddDialog by remember { mutableStateOf(false) }
     var addDialogName by remember { mutableStateOf("") }
     var addDialogExpiry by remember { mutableStateOf("") }
@@ -150,13 +153,13 @@ fun InventoryListScreen(
                             expiringSoon = expiringSoon,
                             expired = expired,
                             searchQuery = searchQuery,
-                            onQueryChange = { searchQuery = it },
+                            onQueryChange = viewModel::setSearchQuery,
                             selectedCategory = selectedCategory,
-                            onCategorySelect = { selectedCategory = it },
+                            onCategorySelect = viewModel::setSelectedCategory,
                             statusFilter = statusFilter,
-                            onStatusFilterSelect = { statusFilter = it },
+                            onStatusFilterSelect = viewModel::setStatusFilter,
                             viewMode = viewMode,
-                            onViewModeChange = { viewMode = it }
+                            onViewModeChange = { viewModel.setViewMode(it.name) }
                         )
                     }
                     items(filteredItems) { item ->
@@ -181,13 +184,13 @@ fun InventoryListScreen(
                             expiringSoon = expiringSoon,
                             expired = expired,
                             searchQuery = searchQuery,
-                            onQueryChange = { searchQuery = it },
+                            onQueryChange = viewModel::setSearchQuery,
                             selectedCategory = selectedCategory,
-                            onCategorySelect = { selectedCategory = it },
+                            onCategorySelect = viewModel::setSelectedCategory,
                             statusFilter = statusFilter,
-                            onStatusFilterSelect = { statusFilter = it },
+                            onStatusFilterSelect = viewModel::setStatusFilter,
                             viewMode = viewMode,
-                            onViewModeChange = { viewMode = it }
+                            onViewModeChange = { viewModel.setViewMode(it.name) }
                         )
                     }
                     items(filteredItems) { item ->
