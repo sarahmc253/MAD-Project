@@ -228,12 +228,7 @@ private fun AddItemTopBar(onBackClick: () -> Unit) {
             Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
         }
         Text("Add Item", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        IconButton(
-            onClick = { },
-            modifier = Modifier.size(40.dp).background(Color.DarkGray.copy(alpha = 0.7f), CircleShape)
-        ) {
-            Icon(Icons.Default.Delete, contentDescription = "Clear", tint = Color.White)
-        }
+        Spacer(modifier = Modifier.size(40.dp))
     }
 }
 
@@ -342,7 +337,10 @@ private fun ScannedItemCard(
 private fun EnterManuallyButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().padding(24.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 24.dp)
+            .navigationBarsPadding(),
         colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -363,33 +361,61 @@ private fun AddDetailsDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add to list") },
+        title = { Text("Add to list", color = colorScheme.onSurface) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = onNameChange,
-                    label = { Text("Product name") },
+                    label = { Text("Product name", color = colorScheme.onSurfaceVariant) },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
+                        focusedBorderColor = colorScheme.primary,
+                        unfocusedBorderColor = colorScheme.outline,
+                        cursorColor = colorScheme.primary,
+                        focusedLabelColor = colorScheme.primary,
+                        unfocusedLabelColor = colorScheme.onSurfaceVariant
+                    )
                 )
                 OutlinedTextField(
                     value = expiry,
                     onValueChange = onExpiryChange,
-                    label = { Text("Expiry date (optional)") },
-                    placeholder = { Text("YYYY-MM-DD") },
+                    label = { Text("Expiry date (optional)", color = colorScheme.onSurfaceVariant) },
+                    placeholder = { Text("YYYY-MM-DD", color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
+                        focusedBorderColor = colorScheme.primary,
+                        unfocusedBorderColor = colorScheme.outline,
+                        cursorColor = colorScheme.primary,
+                        focusedLabelColor = colorScheme.primary,
+                        unfocusedLabelColor = colorScheme.onSurfaceVariant
+                    )
                 )
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = onQuantityChange,
-                    label = { Text("Quantity") },
+                    label = { Text("Quantity", color = colorScheme.onSurfaceVariant) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
+                        focusedBorderColor = colorScheme.primary,
+                        unfocusedBorderColor = colorScheme.outline,
+                        cursorColor = colorScheme.primary,
+                        focusedLabelColor = colorScheme.primary,
+                        unfocusedLabelColor = colorScheme.onSurfaceVariant
+                    )
                 )
             }
         },
@@ -399,7 +425,9 @@ private fun AddDetailsDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel", color = TextSecondary) }
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = colorScheme.onSurfaceVariant)
+            }
         }
     )
 }

@@ -23,17 +23,16 @@ val PantryYellowText = Color(0xFFF9A825)
 val FreezerPurple = Color(0xFFF3E5F5)
 val FreezerPurpleText = Color(0xFF7B1FA2)
 
-// Surfaces & text
-val TextPrimary = Color(0xFF1C1B1F)
-val TextSecondary = Color(0xFF757575)
-val SurfaceVariant = Color(0xFFF5F5F5)
+// App colour scheme: dark background, lighter grey components, readable text
+val TextPrimary = Color(0xFFE6E1E5)
+val TextSecondary = Color(0xFFCAC4D0)
+val SurfaceVariant = Color(0xFF2D2D2D)
 val ChipBg = Color(0xFFEEEEEE)
 val ScannerOverlay = Color(0x99000000)
 
-// Dark theme
-val DarkSurface = Color(0xFF1C1B1F)
-val DarkSurfaceVariant = Color(0xFF2D2D2D)
-val DarkOnSurface = Color(0xFFE6E1E5)
-val DarkOnSurfaceVariant = Color(0xFFCAC4D0)
-val DarkPrimary = Color(0xFF4CAF50)
-val DarkOutline = Color(0xFF938F99)
+val AppSurface = Color(0xFF1C1B1F)
+val AppSurfaceVariant = Color(0xFF2D2D2D)
+val AppOnSurface = Color(0xFFE6E1E5)
+val AppOnSurfaceVariant = Color(0xFFE6E1E5)
+val AppPrimary = Color(0xFF4CAF50)
+val AppOutline = Color(0xFF938F99)

@@ -39,7 +39,7 @@ fun ExpiryAlertsScreen(onBackClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun ExpiryAlertsScreenPreview() {
-    MADProjectTheme(dynamicColour = false) {
+    MADProjectTheme {
         ExpiryAlertsScreen(onBackClick = {})
     }
 }
