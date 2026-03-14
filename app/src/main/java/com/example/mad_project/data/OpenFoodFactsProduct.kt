@@ -13,7 +13,6 @@ data class OpenFoodFactsProduct(
     val barcode: String,
     val productName: String?,
     val brands: String?,
-    val imageUrl: String?,
     val genericName: String?
 ) {
     /** Display name: product name, or "Brand - Barcode" if no name, or just barcode */

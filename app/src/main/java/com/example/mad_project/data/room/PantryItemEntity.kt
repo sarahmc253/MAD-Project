@@ -22,7 +22,6 @@ data class PantryItemEntity(
     @ColumnInfo(name = "expiry_date") val expiryDate: String? = null,
     val quantity: Float? = null,
     val location: String? = null,
-    @ColumnInfo(name = "image_url") val imageUrl: String? = null,
     @ColumnInfo(name = "is_synced") val isSynced: Boolean = false,
     @ColumnInfo(name = "pending_delete") val pendingDelete: Boolean = false
 )
@@ -32,8 +31,7 @@ fun PantryItemEntity.toPantryModel() = PantryModel(
     foodName = foodName,
     expiryDate = expiryDate,
     quantity = quantity,
-    location = location,
-    imageUrl = imageUrl
+    location = location
 )
 
 fun PantryModel.toEntity(isSynced: Boolean = false, pendingDelete: Boolean = false) =
@@ -43,7 +41,6 @@ fun PantryModel.toEntity(isSynced: Boolean = false, pendingDelete: Boolean = fal
         expiryDate = expiryDate,
         quantity = quantity,
         location = location,
-        imageUrl = imageUrl,
         isSynced = isSynced,
         pendingDelete = pendingDelete
     )

@@ -92,8 +92,7 @@ class ItemDetailViewModel(
         foodName = name,
         expiryDate = expiryDate,
         quantity = quantity,
-        location = location,
-        imageUrl = imageUrl
+        location = location
     )
 
     companion object {
