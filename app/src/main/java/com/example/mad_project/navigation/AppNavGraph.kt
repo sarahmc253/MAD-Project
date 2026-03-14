@@ -13,7 +13,6 @@ import com.example.mad_project.data.PantryModel
 import com.example.mad_project.ui.inventory.InventoryListScreen
 import com.example.mad_project.ui.item.AddItemScreen
 import com.example.mad_project.ui.item.ItemDetailsScreen
-import com.example.mad_project.ui.login.LoginScreen
 import com.example.mad_project.ui.theme.MADProjectTheme
 import com.example.mad_project.ui.viewmodel.InventoryViewModel
 
@@ -28,16 +27,6 @@ fun AppNavGraph() {
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
-            composable(Routes.LOGIN) {
-                LoginScreen(
-                    onLoginSuccess = {
-                        navController.navigate(Routes.INVENTORY) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
-                        }
-                    }
-                )
-            }
-
             composable(Routes.INVENTORY) {
                 InventoryListScreen(
                     onItemClick = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
