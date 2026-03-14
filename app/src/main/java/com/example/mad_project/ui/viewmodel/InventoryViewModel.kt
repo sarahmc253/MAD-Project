@@ -42,7 +42,11 @@ data class InventoryUiState(
     val pantryItems: List<PantryModel> = emptyList(),
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
-    val writeInProgress: Boolean = false
+    val writeInProgress: Boolean = false,
+    val searchQuery: String = "",
+    val selectedCategory: String = "All",
+    val statusFilter: String = "All",
+    val viewMode: String = "LIST"
 )
 
 class InventoryViewModel(application: Application) : AndroidViewModel(application) {
@@ -106,6 +110,22 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun setSearchQuery(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
+    fun setSelectedCategory(category: String) {
+        _uiState.update { it.copy(selectedCategory = category) }
+    }
+
+    fun setStatusFilter(filter: String) {
+        _uiState.update { it.copy(statusFilter = filter) }
+    }
+
+    fun setViewMode(mode: String) {
+        _uiState.update { it.copy(viewMode = mode) }
     }
 
     private fun handleWriteResult(result: FirebaseWriteResult) {
