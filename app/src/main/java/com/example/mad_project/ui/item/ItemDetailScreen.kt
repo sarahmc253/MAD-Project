@@ -4,20 +4,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import com.example.mad_project.ui.components.LoadingView
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.InventoryItem
+import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.ui.theme.*
 import com.example.mad_project.ui.viewmodel.ItemDetailViewModel
 
@@ -37,14 +40,29 @@ import com.example.mad_project.ui.viewmodel.ItemDetailViewModel
 fun ItemDetailsScreen(
     itemId: String,
     onBackClick: () -> Unit,
-    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onMarkConsumed: () -> Unit,
-    onRemoveFromPantry: () -> Unit,
 ) {
     val viewModel: ItemDetailViewModel = viewModel(factory = ItemDetailViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val item = uiState.item
+
+    var expiryState by remember(item?.expiryDate) { mutableStateOf(item?.expiryDate ?: "") }
+    var showQuantityDialog by remember { mutableStateOf(false) }
+    var quantityInput by remember { mutableStateOf("") }
+    var showLocationDialog by remember { mutableStateOf(false) }
+    var locationState by remember(item?.location) { mutableStateOf(item?.location ?: ItemLocation.PANTRY) }
+    val colorScheme = MaterialTheme.colorScheme
+    val expiryTextFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = colorScheme.onSurfaceVariant,
+        unfocusedTextColor = colorScheme.onSurfaceVariant,
+        focusedBorderColor = colorScheme.outline,
+        unfocusedBorderColor = colorScheme.outline,
+        focusedContainerColor = colorScheme.surfaceVariant,
+        unfocusedContainerColor = colorScheme.surfaceVariant,
+        cursorColor = colorScheme.primary,
+        focusedLabelColor = colorScheme.onSurfaceVariant,
+        unfocusedLabelColor = colorScheme.onSurfaceVariant
+    )
 
     if (uiState.isLoading) {
         LoadingView()
@@ -58,7 +76,111 @@ fun ItemDetailsScreen(
         return
     }
 
-    val colorScheme = MaterialTheme.colorScheme
+    if (showLocationDialog) {
+        val textFieldColors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = colorScheme.onSurface,
+            unfocusedTextColor = colorScheme.onSurface,
+            focusedBorderColor = colorScheme.primary,
+            unfocusedBorderColor = colorScheme.outline,
+            cursorColor = colorScheme.primary,
+            focusedLabelColor = colorScheme.primary,
+            unfocusedLabelColor = colorScheme.onSurfaceVariant,
+            focusedContainerColor = colorScheme.surface,
+            unfocusedContainerColor = colorScheme.surface
+        )
+        AlertDialog(
+            onDismissRequest = { showLocationDialog = false },
+            containerColor = colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp),
+            title = {
+                Text(
+                    "Change Location",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.onSurfaceVariant
+                )
+            },
+            text = {
+                LocationDropdown(
+                    selectedLocation = locationState,
+                    onLocationSelect = { locationState = it },
+                    label = "Location",
+                    textFieldColors = textFieldColors,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.updateLocation(locationState.name)
+                        showLocationDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Update", color = Color.White) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLocationDialog = false }) {
+                    Text("Cancel", color = colorScheme.onSurfaceVariant)
+                }
+            }
+        )
+    }
+
+    if (showQuantityDialog) {
+        val textFieldColors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = colorScheme.onSurface,
+            unfocusedTextColor = colorScheme.onSurface,
+            focusedBorderColor = colorScheme.primary,
+            unfocusedBorderColor = colorScheme.outline,
+            cursorColor = colorScheme.primary,
+            focusedLabelColor = colorScheme.primary,
+            unfocusedLabelColor = colorScheme.onSurfaceVariant,
+            focusedContainerColor = colorScheme.surface,
+            unfocusedContainerColor = colorScheme.surface
+        )
+        AlertDialog(
+            onDismissRequest = { showQuantityDialog = false },
+            containerColor = colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp),
+            title = {
+                Text(
+                    "Adjust Quantity",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.onSurfaceVariant
+                )
+            },
+            text = {
+                OutlinedTextField(
+                    value = quantityInput,
+                    onValueChange = { quantityInput = it.filter { c -> c.isDigit() } },
+                    label = { Text("Quantity") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = textFieldColors
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.updateQuantity(quantityInput)
+                        showQuantityDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Update", color = Color.White) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showQuantityDialog = false }) {
+                    Text("Cancel", color = colorScheme.onSurfaceVariant)
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -68,11 +190,7 @@ fun ItemDetailsScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
-                    }
-                },
+                actions = {},
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorScheme.surface,
                     titleContentColor = colorScheme.onSurface,
@@ -108,28 +226,18 @@ fun ItemDetailsScreen(
                         tint = colorScheme.onSurfaceVariant
                     )
                 }
-                Row(
+                IconButton(
+                    onClick = {
+                        currentItem.firebaseId?.let { viewModel.deleteItem(it) }
+                        onDeleteClick()
+                    },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(12.dp)
+                        .size(44.dp)
+                        .background(ExpiredRedLight, androidx.compose.foundation.shape.CircleShape)
                 ) {
-                    IconButton(
-                        onClick = onEditClick,
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(colorScheme.surface, CircleShape)
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = colorScheme.onSurface)
-                    }
-                    IconButton(
-                        onClick = onDeleteClick,
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(ExpiredRedLight, CircleShape)
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = ExpiredRed)
-                    }
+                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = ExpiredRed)
                 }
             }
 
@@ -215,21 +323,41 @@ fun ItemDetailsScreen(
                     .padding(top = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                DetailCard(
+                Card(
                     modifier = Modifier.weight(1f),
-                    label = "EXPIRY DATE",
-                    value = currentItem.expiryDate,
-                    actionLabel = "Change",
-                    actionIcon = Icons.Default.CalendarToday,
-                    onClick = { }
-                )
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outline)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            "EXPIRY DATE",
+                            fontSize = 10.sp,
+                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        ExpiryDatePicker(
+                            expiry = expiryState,
+                            onExpiryChange = {
+                                expiryState = it
+                                viewModel.updateExpiryDate(it)
+                            },
+                            textFieldColors = expiryTextFieldColors
+                        )
+                    }
+                }
                 DetailCard(
                     modifier = Modifier.weight(1f),
                     label = "QUANTITY",
                     value = currentItem.quantity,
                     actionLabel = "Adjust",
                     actionIcon = Icons.Default.Add,
-                    onClick = { }
+                    onClick = {
+                        quantityInput = currentItem.quantity
+                        showQuantityDialog = true
+                    }
                 )
             }
             Row(
@@ -247,7 +375,13 @@ fun ItemDetailsScreen(
                 DetailCard(
                     modifier = Modifier.weight(1f),
                     label = "LOCATION",
-                    value = currentItem.location.label
+                    value = currentItem.location.label,
+                    actionLabel = "Change",
+                    actionIcon = Icons.Default.Edit,
+                    onClick = {
+                        locationState = currentItem.location
+                        showLocationDialog = true
+                    }
                 )
             }
 
@@ -272,38 +406,7 @@ fun ItemDetailsScreen(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .padding(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onMarkConsumed,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Mark as Consumed", color = Color.White)
-                }
-                OutlinedButton(
-                    onClick = onRemoveFromPantry,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurface),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outline)
-                ) {
-                    Text("Remove from Pantry")
-                }
-            }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -315,10 +418,7 @@ private fun ItemDetailsScreenPreview() {
         ItemDetailsScreen(
             itemId = "",
             onBackClick = {},
-            onEditClick = {},
-            onDeleteClick = {},
-            onMarkConsumed = {},
-            onRemoveFromPantry = {}
+            onDeleteClick = {}
         )
     }
 }
