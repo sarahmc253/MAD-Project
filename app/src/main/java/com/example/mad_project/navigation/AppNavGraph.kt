@@ -75,11 +75,7 @@ fun AppNavGraph() {
                 val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
                 ItemDetailsScreen(
                     itemId = itemId,
-                    onBackClick = { navController.popBackStack() },
-                    onEditClick = { navController.popBackStack() },
-                    onDeleteClick = { navController.popBackStack() },
-                    onMarkConsumed = { navController.popBackStack() },
-                    onRemoveFromPantry = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }

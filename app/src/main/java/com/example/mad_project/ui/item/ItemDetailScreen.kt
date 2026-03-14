@@ -4,16 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import com.example.mad_project.ui.components.LoadingView
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -44,14 +40,16 @@ import com.example.mad_project.ui.viewmodel.ItemDetailViewModel
 fun ItemDetailsScreen(
     itemId: String,
     onBackClick: () -> Unit,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-    onMarkConsumed: () -> Unit,
-    onRemoveFromPantry: () -> Unit,
 ) {
     val viewModel: ItemDetailViewModel = viewModel(factory = ItemDetailViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val item = uiState.item
+
+    val colorScheme = MaterialTheme.colorScheme
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    var showQuantityDialog by remember { mutableStateOf(false) }
+    var quantityInput by remember { mutableStateOf("") }
 
     if (uiState.isLoading) {
         LoadingView()
@@ -64,12 +62,6 @@ fun ItemDetailsScreen(
         }
         return
     }
-
-    val colorScheme = MaterialTheme.colorScheme
-    var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
-    var showQuantityDialog by remember { mutableStateOf(false) }
-    var quantityInput by remember { mutableStateOf("") }
 
     if (showQuantityDialog) {
         AlertDialog(
@@ -155,42 +147,7 @@ fun ItemDetailsScreen(
                     .padding(horizontal = 16.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(colorScheme.surfaceVariant)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = colorScheme.onSurfaceVariant
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(
-                        onClick = onEditClick,
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(colorScheme.surface, CircleShape)
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = colorScheme.onSurface)
-                    }
-                    IconButton(
-                        onClick = onDeleteClick,
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(ExpiredRedLight, CircleShape)
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = ExpiredRed)
-                    }
-                }
-            }
+            )
 
             Row(
                 modifier = Modifier
@@ -334,38 +291,6 @@ fun ItemDetailsScreen(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .padding(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onMarkConsumed,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Mark as Consumed", color = Color.White)
-                }
-                OutlinedButton(
-                    onClick = onRemoveFromPantry,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurface),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outline)
-                ) {
-                    Text("Remove from Pantry")
-                }
-            }
         }
     }
 }
@@ -376,11 +301,7 @@ private fun ItemDetailsScreenPreview() {
     com.example.mad_project.ui.theme.MADProjectTheme {
         ItemDetailsScreen(
             itemId = "",
-            onBackClick = {},
-            onEditClick = {},
-            onDeleteClick = {},
-            onMarkConsumed = {},
-            onRemoveFromPantry = {}
+            onBackClick = {}
         )
     }
 }
