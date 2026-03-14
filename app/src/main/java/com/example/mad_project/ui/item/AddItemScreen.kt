@@ -12,33 +12,21 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview as CameraPreview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -46,15 +34,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.ui.scanner.BarcodeImageAnalyzer
-import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.ui.theme.ShelfScanGreen
-import com.example.mad_project.ui.theme.TextPrimary
-import com.example.mad_project.ui.theme.TextSecondary
 import com.example.mad_project.ui.viewmodel.AddItemViewModel
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 import java.util.concurrent.Executors
 
 /**
@@ -125,7 +106,7 @@ fun AddItemScreen(
         if (hasCameraPermission) {
             AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
         } else {
-            PermissionPlaceholder(
+            CameraPermissionPlaceholder(
                 onRequestPermission = { permissionLauncher.launch(Manifest.permission.CAMERA) },
                 onOpenSettings = {
                     context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -181,49 +162,6 @@ fun AddItemScreen(
 }
 
 @Composable
-private fun PermissionPlaceholder(
-    onRequestPermission: () -> Unit,
-    onOpenSettings: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF9E9E9E), Color(0xFF757575), Color(0xFF616161))
-                )
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Camera permission is needed to scan barcodes", color = Color.White, fontSize = 16.sp)
-            Text(
-                "If it was denied, enable it in Settings.",
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 14.sp,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Button(onClick = onRequestPermission, colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen)) {
-                Text("Grant permission")
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = onOpenSettings,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-            ) {
-                Text("Open Settings")
-            }
-        }
-    }
-}
-
-@Composable
 private fun AddItemTopBar(onBackClick: () -> Unit) {
     Row(
         modifier = Modifier
@@ -245,107 +183,6 @@ private fun AddItemTopBar(onBackClick: () -> Unit) {
 }
 
 @Composable
-private fun BarcodeFrameHint() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .width(280.dp)
-                .height(160.dp)
-                .background(Color.Transparent)
-                .border(4.dp, ShelfScanGreen, RoundedCornerShape(12.dp))
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Surface(shape = RoundedCornerShape(20.dp), color = Color.DarkGray.copy(alpha = 0.7f)) {
-            Text(
-                "Align barcode within the frame",
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                color = Color.White,
-                fontSize = 14.sp
-            )
-        }
-    }
-}
-
-@Composable
-private fun ScannedItemCard(
-    modifier: Modifier = Modifier,
-    scannedBarcode: String,
-    productName: String?,
-    productBrand: String?,
-    productLoading: Boolean,
-    onRescan: () -> Unit,
-    onAdd: () -> Unit
-) {
-    Card(
-        modifier = modifier
-            .padding(horizontal = 24.dp, vertical = 100.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("ITEM SCANNED", color = ShelfScanGreen, fontWeight = FontWeight.Bold, fontSize = 11.sp)
-                    Icon(Icons.Default.Check, contentDescription = null, tint = ShelfScanGreen, modifier = Modifier.size(14.dp))
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier.size(48.dp).background(Color.LightGray, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Keyboard, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        if (productLoading) {
-                            Text("Looking up product…", fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 16.sp)
-                            Text("Barcode: $scannedBarcode", color = TextSecondary, fontSize = 12.sp)
-                        } else {
-                            Text(
-                                productName ?: "Barcode: $scannedBarcode",
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary,
-                                fontSize = 16.sp
-                            )
-                            Text(
-                                productBrand?.let { "Brand: $it" } ?: "Add to inventory or enter details manually",
-                                color = TextSecondary,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconButton(onClick = onRescan, modifier = Modifier.size(40.dp).background(Color.LightGray, CircleShape)) {
-                    Icon(Icons.Outlined.Refresh, contentDescription = "Rescan", tint = Color.White)
-                }
-                Button(
-                    onClick = onAdd,
-                    colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !productLoading
-                ) {
-                    Text("Add", color = Color.White)
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun EnterManuallyButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
@@ -360,256 +197,6 @@ private fun EnterManuallyButton(modifier: Modifier = Modifier, onClick: () -> Un
         Spacer(modifier = Modifier.width(8.dp))
         Text("Enter Manually", color = Color.White)
     }
-}
-
-/**
- * AI-generated. Expiry date calendar picker; opens a DatePickerDialog when the field is tapped.
- * Prompt: Use a calendar selector for expiry date instead of a text box.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExpiryDatePicker(
-    expiry: String,
-    onExpiryChange: (String) -> Unit,
-    textFieldColors: TextFieldColors,
-    modifier: Modifier = Modifier
-) {
-    var showDatePicker by remember { mutableStateOf(false) }
-    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
-    val colorScheme = MaterialTheme.colorScheme
-
-    Box(modifier = modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = expiry,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Expiry date (optional)") },
-            placeholder = { Text("Select date", color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
-            trailingIcon = {
-                Icon(Icons.Default.CalendarMonth, contentDescription = "Pick date", tint = colorScheme.onSurfaceVariant)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = textFieldColors
-        )
-        // Transparent overlay so the Box receives the tap (TextField would consume it otherwise)
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable { showDatePicker = true }
-        )
-    }
-
-    if (showDatePicker) {
-        val initialMillis = runCatching {
-            expiry.trim().takeIf { it.isNotBlank() }?.let { dateFormatter.parse(it)?.time }
-        }.getOrNull() ?: Calendar.getInstance().timeInMillis
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = initialMillis,
-            yearRange = (Calendar.getInstance().get(Calendar.YEAR) - 1)..(Calendar.getInstance().get(Calendar.YEAR) + 10)
-        )
-        val datePickerColors = DatePickerDefaults.colors(
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
-            headlineContentColor = Color.Black,
-            weekdayContentColor = Color.Black,
-            subheadContentColor = Color.Black,
-            navigationContentColor = Color.Black,
-            yearContentColor = Color.Black,
-            disabledYearContentColor = Color.Gray,
-            currentYearContentColor = Color.Black,
-            selectedYearContentColor = Color.White,
-            dayContentColor = Color.Black,
-            disabledDayContentColor = Color.Gray,
-            selectedDayContentColor = Color.White,
-            todayContentColor = Color.Black,
-            todayDateBorderColor = Color.Black
-        )
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            colors = datePickerColors,
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            onExpiryChange(dateFormatter.format(Date(millis)))
-                        }
-                        showDatePicker = false
-                    }
-                ) {
-                    Text("OK", color = ShelfScanGreen)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel", color = Color.Black)
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState, colors = datePickerColors, showModeToggle = false)
-        }
-    }
-}
-
-/**
- * AI-generated. Location dropdown for add-item dialog; options are Fridge, Freezer, Pantry, Other.
- * Prompt: Allow user to choose storage location from a dropdown.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LocationDropdown(
-    selectedLocation: ItemLocation,
-    onLocationSelect: (ItemLocation) -> Unit,
-    label: String,
-    textFieldColors: TextFieldColors,
-    modifier: Modifier = Modifier
-) {
-    val locationOptions = ItemLocation.entries.filter { it != ItemLocation.UNKNOWN }
-    var expanded by remember { mutableStateOf(false) }
-    val colorScheme = MaterialTheme.colorScheme
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it },
-        modifier = modifier
-    ) {
-        OutlinedTextField(
-            value = selectedLocation.label,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            shape = RoundedCornerShape(12.dp),
-            colors = textFieldColors,
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            containerColor = colorScheme.surface
-        ) {
-            locationOptions.forEach { loc ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            loc.label,
-                            color = if (loc == selectedLocation) colorScheme.primary else colorScheme.onSurface
-                        )
-                    },
-                    onClick = {
-                        onLocationSelect(loc)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun AddDetailsDialog(
-    isManualEntry: Boolean,
-    name: String,
-    expiry: String,
-    quantity: String,
-    location: ItemLocation,
-    onNameChange: (String) -> Unit,
-    onExpiryChange: (String) -> Unit,
-    onQuantityChange: (String) -> Unit,
-    onLocationChange: (ItemLocation) -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    val scrollState = rememberScrollState()
-    val textFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = colorScheme.onSurface,
-        unfocusedTextColor = colorScheme.onSurface,
-        focusedBorderColor = colorScheme.primary,
-        unfocusedBorderColor = colorScheme.outline,
-        cursorColor = colorScheme.primary,
-        focusedLabelColor = colorScheme.primary,
-        unfocusedLabelColor = colorScheme.onSurfaceVariant,
-        focusedContainerColor = colorScheme.surface,
-        unfocusedContainerColor = colorScheme.surface
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(24.dp),
-        icon = {
-            Icon(
-                Icons.Default.Keyboard,
-                contentDescription = null,
-                tint = colorScheme.primary,
-                modifier = Modifier.size(40.dp)
-            )
-        },
-        title = {
-            Text(
-                text = if (isManualEntry) "Enter item details" else "Add to list",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = colorScheme.onSurfaceVariant
-            )
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = onNameChange,
-                    label = { Text("Product name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = textFieldColors
-                )
-                ExpiryDatePicker(
-                    expiry = expiry,
-                    onExpiryChange = onExpiryChange,
-                    textFieldColors = textFieldColors,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = quantity,
-                    onValueChange = onQuantityChange,
-                    label = { Text("Quantity") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = textFieldColors
-                )
-                LocationDropdown(
-                    selectedLocation = location,
-                    onLocationSelect = onLocationChange,
-                    label = "Location",
-                    textFieldColors = textFieldColors,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Add", color = Color.White)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = colorScheme.onSurfaceVariant)
-            }
-        }
-    )
 }
 
 @Preview(showBackground = true)
