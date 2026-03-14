@@ -38,7 +38,7 @@ import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.ui.theme.*
-import com.example.mad_project.ui.inventory.InventoryViewModel
+import com.example.mad_project.ui.viewmodel.InventoryViewModel
 
 private enum class ViewMode { LIST, GRID }
 

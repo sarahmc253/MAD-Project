@@ -1,10 +1,12 @@
 package com.example.mad_project.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
-import com.example.mad_project.data.getPantry
+import com.example.mad_project.data.PantryRepository
+import com.example.mad_project.data.room.ShelfScanDatabase
 import com.example.mad_project.data.toInventoryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,10 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * UI state for the Inventory list screen.
- * Ready to be backed by Room flow when local persistence is added.
- */
 data class InventoryListUiState(
     val items: List<InventoryItem> = emptyList(),
     val searchQuery: String = "",
@@ -28,7 +26,11 @@ data class InventoryListUiState(
 /**
  * ViewModel for Inventory list: search, filters, and derived counts.
  */
-class InventoryListViewModel : ViewModel() {
+class InventoryListViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository: PantryRepository = PantryRepository(
+        ShelfScanDatabase.getInstance(application).pantryItemDao()
+    )
 
     private val _uiState = MutableStateFlow(InventoryListUiState())
     val uiState: StateFlow<InventoryListUiState> = _uiState.asStateFlow()
@@ -41,7 +43,7 @@ class InventoryListViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            getPantry().collect { pantryItems ->
+            repository.pantryItems.collect { pantryItems ->
                 val all = pantryItems.map { it.toInventoryItem() }
                 val (expiringSoon, expired) = computeCounts(all)
                 _uiState.update { state ->

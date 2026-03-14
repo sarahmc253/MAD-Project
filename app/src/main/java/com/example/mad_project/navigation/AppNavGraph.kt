@@ -16,7 +16,7 @@ import com.example.mad_project.ui.item.AddItemScreen
 import com.example.mad_project.ui.item.ItemDetailsScreen
 import com.example.mad_project.ui.login.LoginScreen
 import com.example.mad_project.ui.theme.MADProjectTheme
-import com.example.mad_project.ui.viewmodel.PantryViewModel
+import com.example.mad_project.ui.viewmodel.InventoryViewModel
 
 @Composable
 fun AppNavGraph() {
@@ -58,12 +58,12 @@ fun AppNavGraph() {
             }
 
             composable(Routes.ADD_ITEM) {
-                val pantryViewModel: PantryViewModel = viewModel()
+                val inventoryViewModel: InventoryViewModel = viewModel()
                 AddItemScreen(
                     onBackClick = { navController.popBackStack() },
                     onEnterManuallyClick = { navController.popBackStack() },
                     onAddScannedItem = { name, expiryDate, quantity ->
-                        pantryViewModel.addItem(
+                        inventoryViewModel.addItem(
                             PantryModel(
                                 foodName = name,
                                 dateScanned = java.text.SimpleDateFormat(

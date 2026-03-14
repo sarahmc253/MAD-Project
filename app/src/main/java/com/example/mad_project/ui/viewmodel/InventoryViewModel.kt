@@ -4,18 +4,20 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mad_project.data.FirebaseWriteResult
+import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.PantryModel
 import com.example.mad_project.data.PantryRepository
 import com.example.mad_project.data.networkConnectivityFlow
-import com.example.mad_project.data.room.NuggetDatabase
+import com.example.mad_project.data.room.ShelfScanDatabase
+import com.example.mad_project.data.toInventoryItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -34,31 +36,37 @@ import kotlinx.coroutines.launch
  * monitor network connectivity with a Flow, and sync local Room data to Firebase
  * when the device comes back online."
  */
-data class PantryUiState(
-    val items: List<PantryModel> = emptyList(),
+
+data class InventoryUiState(
+    val items: List<InventoryItem> = emptyList(),
+    val pantryItems: List<PantryModel> = emptyList(),
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
     val writeInProgress: Boolean = false
 )
 
-class PantryViewModel(application: Application) : AndroidViewModel(application) {
+class InventoryViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val localRepository: PantryRepository = PantryRepository(
-        NuggetDatabase.getInstance(application).pantryItemDao()
+    private val repository: PantryRepository = PantryRepository(
+        ShelfScanDatabase.getInstance(application).pantryItemDao()
     )
 
-    private val _uiState = MutableStateFlow(PantryUiState())
-    val uiState: StateFlow<PantryUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(InventoryUiState())
+    val uiState: StateFlow<InventoryUiState> = _uiState.asStateFlow()
 
     val isOnline: StateFlow<Boolean> = application.networkConnectivityFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
-        // UI reads from Room — always available, online or offline.
         viewModelScope.launch {
-            localRepository.pantryItems.collect { items ->
+            repository.pantryItems.collect { pantryItems ->
                 _uiState.update {
-                    it.copy(items = items, isLoading = false, errorMessage = null)
+                    it.copy(
+                        items = pantryItems.map { p -> p.toInventoryItem() },
+                        pantryItems = pantryItems,
+                        isLoading = false,
+                        errorMessage = null
+                    )
                 }
             }
         }
@@ -69,13 +77,11 @@ class PantryViewModel(application: Application) : AndroidViewModel(application) 
             isOnline.collect { online ->
                 firebaseListenerJob?.cancel()
                 if (online) {
-                    // Sync any offline writes/deletes first, then start the live listener.
-                    launch(Dispatchers.IO) { localRepository.syncPendingToFirebase() }
-
+                    launch(Dispatchers.IO) { repository.syncPendingToFirebase() }
                     firebaseListenerJob = launch {
-                        localRepository.firebaseItems().collect { firebaseItems ->
+                        repository.firebaseItems().collect { firebaseItems ->
                             launch(Dispatchers.IO) {
-                                localRepository.updateFromFirebase(firebaseItems)
+                                repository.updateFromFirebase(firebaseItems)
                             }
                         }
                     }
@@ -86,7 +92,7 @@ class PantryViewModel(application: Application) : AndroidViewModel(application) 
 
     fun addItem(item: PantryModel) {
         viewModelScope.launch {
-            localRepository.addItem(item, isOnline.value).collect { result ->
+            repository.addItem(item, isOnline.value).collect { result ->
                 handleWriteResult(result)
             }
         }
@@ -94,7 +100,7 @@ class PantryViewModel(application: Application) : AndroidViewModel(application) 
 
     fun updateItem(item: PantryModel) {
         viewModelScope.launch {
-            localRepository.updateItem(item, isOnline.value).collect { result ->
+            repository.updateItem(item, isOnline.value).collect { result ->
                 handleWriteResult(result)
             }
         }
@@ -102,10 +108,14 @@ class PantryViewModel(application: Application) : AndroidViewModel(application) 
 
     fun deleteItem(itemId: String) {
         viewModelScope.launch {
-            localRepository.deleteItem(itemId, isOnline.value).collect { result ->
+            repository.deleteItem(itemId, isOnline.value).collect { result ->
                 handleWriteResult(result)
             }
         }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
     private fun handleWriteResult(result: FirebaseWriteResult) {
@@ -115,12 +125,6 @@ class PantryViewModel(application: Application) : AndroidViewModel(application) 
                 FirebaseWriteResult.Success -> it.copy(writeInProgress = false)
                 is FirebaseWriteResult.Error -> it.copy(writeInProgress = false, errorMessage = result.message)
             }
-        }
-    }
-
-    fun clearError() {
-        _uiState.update { state ->
-            state.copy(errorMessage = null)
         }
     }
 }
