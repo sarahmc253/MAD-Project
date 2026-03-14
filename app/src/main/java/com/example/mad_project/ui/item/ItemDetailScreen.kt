@@ -31,7 +31,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.ui.theme.*
 import com.example.mad_project.ui.viewmodel.ItemDetailViewModel
-import com.example.mad_project.ui.viewmodel.ItemDetailViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,11 +41,8 @@ fun ItemDetailsScreen(
     onDeleteClick: () -> Unit,
     onMarkConsumed: () -> Unit,
     onRemoveFromPantry: () -> Unit,
-    viewModel: ItemDetailViewModel = viewModel(
-        key = "item_detail_$itemId",
-        factory = ItemDetailViewModelFactory(itemId)
-    )
 ) {
+    val viewModel: ItemDetailViewModel = viewModel(factory = ItemDetailViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val item = uiState.item
 
