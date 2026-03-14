@@ -25,7 +25,7 @@ fun LiveExpiryStatusPanelScreen(onBackClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun LiveExpiryStatusPanelScreenPreview() {
-    MADProjectTheme(dynamicColour = false) {
+    MADProjectTheme {
         LiveExpiryStatusPanelScreen(onBackClick = {})
     }
 }

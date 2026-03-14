@@ -24,7 +24,7 @@ fun ErrorBanner(message: String) {
 @Preview(showBackground = true)
 @Composable
 private fun ErrorBannerPreview() {
-    MADProjectTheme(dynamicColour = false) {
+    MADProjectTheme {
         ErrorBanner("Something went wrong")
     }
 }

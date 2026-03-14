@@ -2,7 +2,6 @@ package com.example.mad_project.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,20 +21,10 @@ import com.example.mad_project.ui.viewmodel.InventoryViewModel
 fun AppNavGraph() {
     val navController = rememberNavController()
 
-    fun navigateToTab(route: String) {
-        navController.navigate(route) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
-    MADProjectTheme(dynamicColour = false) {
+    MADProjectTheme {
         NavHost(
             navController = navController,
-            startDestination = Routes.LOGIN,
+            startDestination = Routes.INVENTORY,
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
@@ -51,7 +40,6 @@ fun AppNavGraph() {
 
             composable(Routes.INVENTORY) {
                 InventoryListScreen(
-                    onAddClick = { navController.navigate(Routes.ADD_ITEM) },
                     onItemClick = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
                     onScannerClick = { navController.navigate(Routes.ADD_ITEM) }
                 )

@@ -30,7 +30,7 @@ fun AppTopBar(
 @Preview(showBackground = true)
 @Composable
 private fun AppTopBarPreview() {
-    MADProjectTheme(dynamicColour = false) {
+    MADProjectTheme {
         AppTopBar(title = "Screen Title")
     }
 }
@@ -38,7 +38,7 @@ private fun AppTopBarPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun AppTopBarWithBackPreview() {
-    MADProjectTheme(dynamicColour = false) {
+    MADProjectTheme {
         AppTopBar(title = "Detail", showBack = true, onBackClick = {})
     }
 }

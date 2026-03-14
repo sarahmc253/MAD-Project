@@ -58,6 +58,7 @@ fun ItemDetailsScreen(
         return
     }
 
+    val colorScheme = MaterialTheme.colorScheme
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,10 +74,10 @@ fun ItemDetailsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = Color.Black,
-                    navigationIconContentColor = Color.Black,
-                    actionIconContentColor = Color.Black
+                    containerColor = colorScheme.surface,
+                    titleContentColor = colorScheme.onSurface,
+                    navigationIconContentColor = colorScheme.onSurface,
+                    actionIconContentColor = colorScheme.onSurface
                 )
             )
         }
@@ -84,18 +85,18 @@ fun ItemDetailsScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
+                .fillMaxSize()
+                .background(colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Item image with overlay buttons
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp)
                     .padding(horizontal = 16.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFE0E0E0))
+                    .background(colorScheme.surfaceVariant)
             ) {
-                // Placeholder for image - could use Coil with currentItem.imageUrl
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -104,7 +105,7 @@ fun ItemDetailsScreen(
                         Icons.Default.Add,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = Color.Gray
+                        tint = colorScheme.onSurfaceVariant
                     )
                 }
                 Row(
@@ -117,9 +118,9 @@ fun ItemDetailsScreen(
                         onClick = onEditClick,
                         modifier = Modifier
                             .size(44.dp)
-                            .background(Color.White, CircleShape)
+                            .background(colorScheme.surface, CircleShape)
                     ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Black)
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = colorScheme.onSurface)
                     }
                     IconButton(
                         onClick = onDeleteClick,
@@ -132,7 +133,6 @@ fun ItemDetailsScreen(
                 }
             }
 
-            // Name + IN STOCK badge
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,7 +161,6 @@ fun ItemDetailsScreen(
                 }
             }
 
-            // Tags: Expiring in 5 days, Dairy
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -209,7 +208,6 @@ fun ItemDetailsScreen(
                 }
             }
 
-            // 2x2 detail cards
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -253,7 +251,6 @@ fun ItemDetailsScreen(
                 )
             }
 
-            // Notes
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -275,7 +272,6 @@ fun ItemDetailsScreen(
                 )
             }
 
-            // Action buttons
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -302,7 +298,8 @@ fun ItemDetailsScreen(
                     onClick = onRemoveFromPantry,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outline)
                 ) {
                     Text("Remove from Pantry")
                 }
@@ -314,7 +311,7 @@ fun ItemDetailsScreen(
 @Preview(showBackground = true)
 @Composable
 private fun ItemDetailsScreenPreview() {
-    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
+    com.example.mad_project.ui.theme.MADProjectTheme {
         ItemDetailsScreen(
             itemId = "",
             onBackClick = {},
@@ -335,11 +332,13 @@ private fun DetailCard(
     actionIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
     onClick: (() -> Unit)? = null
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0E0E0))
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outline)
     ) {
         Column(
             modifier = Modifier.padding(12.dp)
@@ -347,14 +346,14 @@ private fun DetailCard(
             Text(
                 label,
                 fontSize = 10.sp,
-                color = TextSecondary,
+                color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 fontWeight = FontWeight.Medium
             )
             Text(
                 value,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
             if (actionLabel != null && actionIcon != null && onClick != null) {
@@ -380,7 +379,7 @@ private fun DetailCard(
 @Preview(showBackground = true)
 @Composable
 private fun DetailCardPreview() {
-    com.example.mad_project.ui.theme.MADProjectTheme(dynamicColour = false) {
+    com.example.mad_project.ui.theme.MADProjectTheme {
         DetailCard(
             label = "Location",
             value = "Fridge",

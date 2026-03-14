@@ -27,7 +27,7 @@ fun getPantry(): Flow<List<PantryModel>> {
         logName = "getPantry"
     ) { dataSnapshot ->
         dataSnapshot.children.mapNotNull { child ->
-            child.getValue(PantryModel::class.java)
+            child.getValue(PantryModel::class.java)?.copy(itemId = child.key ?: "")
         }
     }
 }
