@@ -24,8 +24,6 @@ import com.example.mad_project.ui.inventory.ShelfScanBottomBar
 import com.example.mad_project.ui.item.AddItemScreen
 import com.example.mad_project.ui.item.ItemDetailsScreen
 import com.example.mad_project.ui.login.LoginScreen
-import com.example.mad_project.ui.scanner.BarcodeScannerScreen
-import com.example.mad_project.ui.shopping.ShoppingListScreen
 import com.example.mad_project.ui.theme.MADProjectTheme
 import com.example.mad_project.ui.viewmodel.PantryViewModel
 
@@ -60,52 +58,11 @@ fun AppNavGraph() {
                 )
             }
 
-            composable(Routes.SCANNER) {
-                BarcodeScannerScreen(
-                    onDone = {
-                        navController.navigate(Routes.INVENTORY) {
-                            popUpTo(Routes.SCANNER) { inclusive = true }
-                        }
-                    }
-                )
-            }
-
             composable(Routes.INVENTORY) {
                 InventoryListScreen(
                     onAddClick = { navController.navigate(Routes.ADD_ITEM) },
                     onItemClick = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
-                    onShoppingClick = { navigateToTab(Routes.LIST) },
-                    onRecipesClick = { navigateToTab(Routes.RECIPES) },
-                    onSettingsClick = { navigateToTab(Routes.SETTINGS) }
-                )
-            }
-
-            composable(Routes.LIST) {
-                ShoppingListScreen(
-                    onInventoryClick = { navigateToTab(Routes.INVENTORY) },
-                    onRecipesClick = { navigateToTab(Routes.RECIPES) },
-                    onSettingsClick = { navigateToTab(Routes.SETTINGS) },
-                    onAddClick = { navController.navigate(Routes.ADD_ITEM) }
-                )
-            }
-
-            composable(Routes.RECIPES) {
-                PlaceholderTabScreen(
-                    title = "Recipes",
-                    onInventoryClick = { navigateToTab(Routes.INVENTORY) },
-                    onListClick = { navigateToTab(Routes.LIST) },
-                    onRecipesClick = { },
-                    onSettingsClick = { navigateToTab(Routes.SETTINGS) }
-                )
-            }
-
-            composable(Routes.SETTINGS) {
-                PlaceholderTabScreen(
-                    title = "Settings",
-                    onInventoryClick = { navigateToTab(Routes.INVENTORY) },
-                    onListClick = { navigateToTab(Routes.LIST) },
-                    onRecipesClick = { navigateToTab(Routes.RECIPES) },
-                    onSettingsClick = { }
+                    onScannerClick = { navController.navigate(Routes.ADD_ITEM) }
                 )
             }
 
@@ -145,39 +102,6 @@ fun AppNavGraph() {
                     onRemoveFromPantry = { navController.popBackStack() }
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun PlaceholderTabScreen(
-    title: String,
-    onInventoryClick: () -> Unit,
-    onListClick: () -> Unit,
-    onRecipesClick: () -> Unit,
-    onSettingsClick: () -> Unit
-) {
-    Scaffold(
-        bottomBar = {
-            ShelfScanBottomBar(
-                currentTab = title,
-                onInventoryClick = onInventoryClick,
-                onListClick = onListClick,
-                onRecipesClick = onRecipesClick,
-                onSettingsClick = onSettingsClick
-            )
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "$title – Coming soon",
-                modifier = Modifier.padding(16.dp)
-            )
         }
     }
 }

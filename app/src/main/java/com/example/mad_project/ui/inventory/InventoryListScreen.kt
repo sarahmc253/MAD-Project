@@ -18,11 +18,9 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,9 +47,7 @@ private enum class ViewMode { LIST, GRID }
 fun InventoryListScreen(
     onAddClick: () -> Unit,
     onItemClick: (String) -> Unit,
-    onShoppingClick: () -> Unit,
-    onRecipesClick: () -> Unit,
-    onSettingsClick: () -> Unit,
+    onScannerClick: () -> Unit,
     viewModel: InventoryViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -83,9 +79,7 @@ fun InventoryListScreen(
             ShelfScanBottomBar(
                 currentTab = "Inventory",
                 onInventoryClick = { },
-                onListClick = onShoppingClick,
-                onRecipesClick = onRecipesClick,
-                onSettingsClick = onSettingsClick
+                onScannerClick = onScannerClick
             )
         }
     ) { padding ->
@@ -636,9 +630,7 @@ private fun InventoryGridCard(
 fun ShelfScanBottomBar(
     currentTab: String,
     onInventoryClick: () -> Unit,
-    onListClick: () -> Unit,
-    onRecipesClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onScannerClick: () -> Unit
 ) {
     NavigationBar(
         containerColor = Color.White,
@@ -651,22 +643,10 @@ fun ShelfScanBottomBar(
             onClick = onInventoryClick
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null, modifier = Modifier.size(24.dp)) },
-            label = { Text("List") },
-            selected = currentTab == "List",
-            onClick = onListClick
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Outlined.Restaurant, contentDescription = null, modifier = Modifier.size(24.dp)) },
-            label = { Text("Recipes") },
-            selected = currentTab == "Recipes",
-            onClick = onRecipesClick
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(24.dp)) },
-            label = { Text("Settings") },
-            selected = currentTab == "Settings",
-            onClick = onSettingsClick
+            icon = { Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(24.dp)) },
+            label = { Text("Scanner") },
+            selected = currentTab == "Scanner",
+            onClick = onScannerClick
         )
     }
 }
@@ -678,9 +658,7 @@ private fun InventoryListScreenPreview() {
         InventoryListScreen(
             onAddClick = {},
             onItemClick = {},
-            onShoppingClick = {},
-            onRecipesClick = {},
-            onSettingsClick = {}
+            onScannerClick = {}
         )
     }
 }
@@ -736,9 +714,7 @@ private fun ShelfScanBottomBarPreview() {
         ShelfScanBottomBar(
             currentTab = "Inventory",
             onInventoryClick = {},
-            onListClick = {},
-            onRecipesClick = {},
-            onSettingsClick = {}
+            onScannerClick = {}
         )
     }
 }

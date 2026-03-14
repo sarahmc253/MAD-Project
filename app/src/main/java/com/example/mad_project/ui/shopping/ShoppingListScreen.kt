@@ -22,8 +22,7 @@ import com.example.mad_project.ui.theme.ShelfScanGreen
 @Composable
 fun ShoppingListScreen(
     onInventoryClick: () -> Unit = {},
-    onRecipesClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {},
+    onScannerClick: () -> Unit = {},
     onAddClick: () -> Unit = {}
 ) {
     Scaffold(
@@ -41,9 +40,7 @@ fun ShoppingListScreen(
             ShelfScanBottomBar(
                 currentTab = "List",
                 onInventoryClick = onInventoryClick,
-                onListClick = { },
-                onRecipesClick = onRecipesClick,
-                onSettingsClick = onSettingsClick
+                onScannerClick = onScannerClick
             )
         }
     ) { padding ->
