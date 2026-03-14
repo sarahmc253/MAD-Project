@@ -367,7 +367,7 @@ private fun DetailCardPreview() {
             label = "Location",
             value = "Fridge",
             actionLabel = "Change",
-            actionIcon = androidx.compose.material.icons.Icons.Default.Edit,
+            actionIcon = Icons.Default.CalendarToday,
             onClick = {}
         )
     }
