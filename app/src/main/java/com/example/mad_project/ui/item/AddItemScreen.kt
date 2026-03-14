@@ -14,6 +14,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
@@ -44,10 +46,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.ui.scanner.BarcodeImageAnalyzer
+import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.ui.theme.ShelfScanGreen
 import com.example.mad_project.ui.theme.TextPrimary
 import com.example.mad_project.ui.theme.TextSecondary
 import com.example.mad_project.ui.viewmodel.AddItemViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.Executors
 
 /**
@@ -55,9 +62,9 @@ import java.util.concurrent.Executors
  * ActivityResultContracts.RequestPermission, Settings.ACTION_APPLICATION_DETAILS_SETTINGS.
  *
  * Add Item screen with live camera and barcode scanning. On scan, looks up product via
- * Open Food Facts and shows name/brand. Tap Add opens edit-details dialog (name, expiry, quantity);
+ * Open Food Facts and shows name/brand. Tap Add opens edit-details dialog (name, expiry, quantity, location);
  * Enter Manually opens the same dialog with empty name. Camera permission: if denied, show
- * Open Settings button to deep-link to app permissions. Callback passes (name, expiryDate, quantity)
+ * Open Settings button to deep-link to app permissions. Callback passes (name, expiryDate, quantity, location)
  * to add to pantry.
  *
  * Prompt: Wire Add Item to camera and Open Food Facts; add edit-details dialog before adding;
@@ -68,7 +75,7 @@ import java.util.concurrent.Executors
 fun AddItemScreen(
     onBackClick: () -> Unit,
     onEnterManuallyClick: () -> Unit,
-    onAddScannedItem: (name: String, expiryDate: String?, quantity: Float) -> Unit,
+    onAddScannedItem: (name: String, expiryDate: String?, quantity: Float, location: String) -> Unit,
     viewModel: AddItemViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -157,12 +164,14 @@ fun AddItemScreen(
                 name = uiState.dialogName,
                 expiry = uiState.dialogExpiry,
                 quantity = uiState.dialogQuantity,
+                location = uiState.dialogLocation,
                 onNameChange = viewModel::setDialogName,
                 onExpiryChange = viewModel::setDialogExpiry,
                 onQuantityChange = viewModel::setDialogQuantity,
+                onLocationChange = viewModel::setDialogLocation,
                 onConfirm = {
-                    val (name, expiry, qty) = viewModel.getDialogValuesForAdd()
-                    onAddScannedItem(name, expiry, qty)
+                    val values = viewModel.getDialogValuesForAdd()
+                    onAddScannedItem(values.name, values.expiryDate, values.quantity, values.locationName)
                     viewModel.dismissDialog()
                 },
                 onDismiss = viewModel::dismissDialog
@@ -353,15 +362,162 @@ private fun EnterManuallyButton(modifier: Modifier = Modifier, onClick: () -> Un
     }
 }
 
+/**
+ * AI-generated. Expiry date calendar picker; opens a DatePickerDialog when the field is tapped.
+ * Prompt: Use a calendar selector for expiry date instead of a text box.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExpiryDatePicker(
+    expiry: String,
+    onExpiryChange: (String) -> Unit,
+    textFieldColors: TextFieldColors,
+    modifier: Modifier = Modifier
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    val colorScheme = MaterialTheme.colorScheme
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = expiry,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Expiry date (optional)") },
+            placeholder = { Text("Select date", color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
+            trailingIcon = {
+                Icon(Icons.Default.CalendarMonth, contentDescription = "Pick date", tint = colorScheme.onSurfaceVariant)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = textFieldColors
+        )
+        // Transparent overlay so the Box receives the tap (TextField would consume it otherwise)
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { showDatePicker = true }
+        )
+    }
+
+    if (showDatePicker) {
+        val initialMillis = runCatching {
+            expiry.trim().takeIf { it.isNotBlank() }?.let { dateFormatter.parse(it)?.time }
+        }.getOrNull() ?: Calendar.getInstance().timeInMillis
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initialMillis,
+            yearRange = (Calendar.getInstance().get(Calendar.YEAR) - 1)..(Calendar.getInstance().get(Calendar.YEAR) + 10)
+        )
+        val datePickerColors = DatePickerDefaults.colors(
+            containerColor = Color.White,
+            titleContentColor = Color.Black,
+            headlineContentColor = Color.Black,
+            weekdayContentColor = Color.Black,
+            subheadContentColor = Color.Black,
+            navigationContentColor = Color.Black,
+            yearContentColor = Color.Black,
+            disabledYearContentColor = Color.Gray,
+            currentYearContentColor = Color.Black,
+            selectedYearContentColor = Color.White,
+            dayContentColor = Color.Black,
+            disabledDayContentColor = Color.Gray,
+            selectedDayContentColor = Color.White,
+            todayContentColor = Color.Black,
+            todayDateBorderColor = Color.Black
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            colors = datePickerColors,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            onExpiryChange(dateFormatter.format(Date(millis)))
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK", color = ShelfScanGreen)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel", color = Color.Black)
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState, colors = datePickerColors, showModeToggle = false)
+        }
+    }
+}
+
+/**
+ * AI-generated. Location dropdown for add-item dialog; options are Fridge, Freezer, Pantry, Other.
+ * Prompt: Allow user to choose storage location from a dropdown.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LocationDropdown(
+    selectedLocation: ItemLocation,
+    onLocationSelect: (ItemLocation) -> Unit,
+    label: String,
+    textFieldColors: TextFieldColors,
+    modifier: Modifier = Modifier
+) {
+    val locationOptions = ItemLocation.entries.filter { it != ItemLocation.UNKNOWN }
+    var expanded by remember { mutableStateOf(false) }
+    val colorScheme = MaterialTheme.colorScheme
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedLocation.label,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            shape = RoundedCornerShape(12.dp),
+            colors = textFieldColors,
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            containerColor = colorScheme.surface
+        ) {
+            locationOptions.forEach { loc ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            loc.label,
+                            color = if (loc == selectedLocation) colorScheme.primary else colorScheme.onSurface
+                        )
+                    },
+                    onClick = {
+                        onLocationSelect(loc)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun AddDetailsDialog(
     isManualEntry: Boolean,
     name: String,
     expiry: String,
     quantity: String,
+    location: ItemLocation,
     onNameChange: (String) -> Unit,
     onExpiryChange: (String) -> Unit,
     onQuantityChange: (String) -> Unit,
+    onLocationChange: (ItemLocation) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -414,15 +570,11 @@ fun AddDetailsDialog(
                     shape = RoundedCornerShape(12.dp),
                     colors = textFieldColors
                 )
-                OutlinedTextField(
-                    value = expiry,
-                    onValueChange = onExpiryChange,
-                    label = { Text("Expiry date (optional)") },
-                    placeholder = { Text("YYYY-MM-DD", color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = textFieldColors
+                ExpiryDatePicker(
+                    expiry = expiry,
+                    onExpiryChange = onExpiryChange,
+                    textFieldColors = textFieldColors,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = quantity,
@@ -433,6 +585,13 @@ fun AddDetailsDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     shape = RoundedCornerShape(12.dp),
                     colors = textFieldColors
+                )
+                LocationDropdown(
+                    selectedLocation = location,
+                    onLocationSelect = onLocationChange,
+                    label = "Location",
+                    textFieldColors = textFieldColors,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         },
@@ -456,5 +615,5 @@ fun AddDetailsDialog(
 @Preview(showBackground = true)
 @Composable
 private fun AddItemScreenPreview() {
-    AddItemScreen(onBackClick = {}, onEnterManuallyClick = {}, onAddScannedItem = { _, _, _ -> })
+    AddItemScreen(onBackClick = {}, onEnterManuallyClick = {}, onAddScannedItem = { _, _, _, _ -> })
 }
