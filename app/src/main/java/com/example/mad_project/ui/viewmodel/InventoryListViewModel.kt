@@ -1,12 +1,14 @@
 package com.example.mad_project.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.mad_project.data.InventoryItem
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.mad_project.ShelfScanApplication
 import com.example.mad_project.data.ExpiryStatus
+import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.PantryRepository
-import com.example.mad_project.data.room.ShelfScanDatabase
 import com.example.mad_project.data.toInventoryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,10 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * UI state for the Inventory list screen.
- * Ready to be backed by Room flow when local persistence is added.
- */
 data class InventoryListUiState(
     val items: List<InventoryItem> = emptyList(),
     val searchQuery: String = "",
@@ -30,11 +28,7 @@ data class InventoryListUiState(
 /**
  * ViewModel for Inventory list: search, filters, and derived counts.
  */
-class InventoryListViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository: PantryRepository = PantryRepository(
-        ShelfScanDatabase.getInstance(application).pantryItemDao()
-    )
+class InventoryListViewModel(private val repository: PantryRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(InventoryListUiState())
     val uiState: StateFlow<InventoryListUiState> = _uiState.asStateFlow()
@@ -71,5 +65,15 @@ class InventoryListViewModel(application: Application) : AndroidViewModel(applic
 
     fun setStatusFilter(filter: String) {
         _uiState.update { it.copy(statusFilter = filter) }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val repository =
+                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as ShelfScanApplication).repository
+                InventoryListViewModel(repository)
+            }
+        }
     }
 }
