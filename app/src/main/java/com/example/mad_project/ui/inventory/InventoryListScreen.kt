@@ -1,7 +1,6 @@
 package com.example.mad_project.ui.inventory
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,7 +45,6 @@ import com.example.mad_project.ui.viewmodel.InventoryViewModel
 
 private enum class ViewMode { LIST, GRID }
 
-/** Picks a consistent (bg, text) color pair for the first-letter avatar based on item name. */
 private fun avatarColorsFor(name: String): Pair<Color, Color> {
     val palette = listOf(
         FridgeBlue to FridgeBlueText,
@@ -56,14 +53,13 @@ private fun avatarColorsFor(name: String): Pair<Color, Color> {
         ShelfScanGreenLightBg to ShelfScanGreen,
         ExpiringSoonOrangeLight to ExpiringSoonOrange,
         ExpiredRedLight to ExpiredRed,
-        Color(0xFFE8EAF6) to Color(0xFF3F51B5),   // indigo
-        Color(0xFFFCE4EC) to Color(0xFFE91E63),   // pink
+        Color(0xFFE8EAF6) to Color(0xFF3F51B5),
+        Color(0xFFFCE4EC) to Color(0xFFE91E63),
     )
     val index = name.firstOrNull()?.code?.rem(palette.size)?.coerceAtLeast(0) ?: 0
     return palette[index]
 }
 
-/** Single item for @Preview only; not used as app data. */
 private fun previewInventoryItem() = InventoryItem(
     id = "preview",
     name = "Preview Item",

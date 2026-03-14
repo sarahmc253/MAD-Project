@@ -89,7 +89,6 @@ fun ItemDetailsScreen(
                 .background(colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Item image with overlay buttons
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -98,7 +97,6 @@ fun ItemDetailsScreen(
                     .clip(RoundedCornerShape(12.dp))
                     .background(colorScheme.surfaceVariant)
             ) {
-                // Placeholder for image - could use Coil with currentItem.imageUrl
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -135,7 +133,6 @@ fun ItemDetailsScreen(
                 }
             }
 
-            // Name + IN STOCK badge
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -164,7 +161,6 @@ fun ItemDetailsScreen(
                 }
             }
 
-            // Tags: Expiring in 5 days, Dairy
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -212,7 +208,6 @@ fun ItemDetailsScreen(
                 }
             }
 
-            // 2x2 detail cards
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -256,7 +251,6 @@ fun ItemDetailsScreen(
                 )
             }
 
-            // Notes
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -278,7 +272,6 @@ fun ItemDetailsScreen(
                 )
             }
 
-            // Action buttons
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
