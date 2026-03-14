@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.ui.theme.*
@@ -230,10 +231,10 @@ fun ItemDetailsScreen(
                 )
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = ShelfScanGreen
+                    color = if (currentItem.expiryStatus == ExpiryStatus.EXPIRED) ExpiredRed else ShelfScanGreen
                 ) {
                     Text(
-                        "IN STOCK",
+                        if (currentItem.expiryStatus == ExpiryStatus.EXPIRED) "EXPIRED" else "IN DATE",
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
