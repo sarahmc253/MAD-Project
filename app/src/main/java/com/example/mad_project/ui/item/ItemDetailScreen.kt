@@ -14,10 +14,17 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +66,58 @@ fun ItemDetailsScreen(
     }
 
     val colorScheme = MaterialTheme.colorScheme
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    var showQuantityDialog by remember { mutableStateOf(false) }
+    var quantityInput by remember { mutableStateOf("") }
+
+    if (showQuantityDialog) {
+        AlertDialog(
+            onDismissRequest = { showQuantityDialog = false },
+            title = { Text("Adjust Quantity") },
+            text = {
+                OutlinedTextField(
+                    value = quantityInput,
+                    onValueChange = { quantityInput = it.filter { c -> c.isDigit() } },
+                    label = { Text("Quantity") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.updateQuantity(quantityInput)
+                    showQuantityDialog = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showQuantityDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val newDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneOffset.UTC)
+                            .toLocalDate()
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        viewModel.updateExpiryDate(newDate)
+                    }
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,8 +128,8 @@ fun ItemDetailsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
+                    IconButton(onClick = { viewModel.refresh() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -221,7 +280,7 @@ fun ItemDetailsScreen(
                     value = currentItem.expiryDate,
                     actionLabel = "Change",
                     actionIcon = Icons.Default.CalendarToday,
-                    onClick = { }
+                    onClick = { showDatePicker = true }
                 )
                 DetailCard(
                     modifier = Modifier.weight(1f),
@@ -229,7 +288,10 @@ fun ItemDetailsScreen(
                     value = currentItem.quantity,
                     actionLabel = "Adjust",
                     actionIcon = Icons.Default.Add,
-                    onClick = { }
+                    onClick = {
+                        quantityInput = currentItem.quantity
+                        showQuantityDialog = true
+                    }
                 )
             }
             Row(

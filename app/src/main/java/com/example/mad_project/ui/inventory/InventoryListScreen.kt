@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
 import com.example.mad_project.data.PantryModel
@@ -97,6 +98,9 @@ fun InventoryListScreen(
     val expiringSoon = uiState.items.count { it.expiryStatus == ExpiryStatus.EXPIRES_SOON }
     val expired = uiState.items.count { it.expiryStatus == ExpiryStatus.EXPIRED }
     val focusManager = LocalFocusManager.current
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
@@ -120,7 +124,12 @@ fun InventoryListScreen(
         bottomBar = {
             ShelfScanBottomBar(
                 currentTab = "Inventory",
-                onInventoryClick = { },
+                onInventoryClick = {
+                    coroutineScope.launch {
+                        if (viewMode == ViewMode.LIST) listState.animateScrollToItem(0)
+                        else gridState.animateScrollToItem(0)
+                    }
+                },
                 onScannerClick = onScannerClick
             )
         }
@@ -140,6 +149,7 @@ fun InventoryListScreen(
                 }
             } else if (viewMode == ViewMode.LIST) {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(bottom = 80.dp)
@@ -169,6 +179,7 @@ fun InventoryListScreen(
                 }
             } else {
                 LazyVerticalGrid(
+                    state = gridState,
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
