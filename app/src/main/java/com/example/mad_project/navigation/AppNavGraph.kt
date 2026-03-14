@@ -76,10 +76,7 @@ fun AppNavGraph() {
                 ItemDetailsScreen(
                     itemId = itemId,
                     onBackClick = { navController.popBackStack() },
-                    onEditClick = { navController.popBackStack() },
-                    onDeleteClick = { navController.popBackStack() },
-                    onMarkConsumed = { navController.popBackStack() },
-                    onRemoveFromPantry = { navController.popBackStack() }
+                    onDeleteClick = { navController.popBackStack() }
                 )
             }
         }
