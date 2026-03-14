@@ -3,25 +3,47 @@ package com.example.mad_project.ui.shopping
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.mad_project.ui.components.AppTopBar
+import com.example.mad_project.ui.inventory.ShelfScanBottomBar
 import com.example.mad_project.ui.theme.MADProjectTheme
+import com.example.mad_project.ui.theme.ShelfScanGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(
-    onBackClick: (() -> Unit)? = null
+    onInventoryClick: () -> Unit = {},
+    onRecipesClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
+    onAddClick: () -> Unit = {}
 ) {
     Scaffold(
-        topBar = {
-            AppTopBar(
-                title = "Shopping List",
-                showBack = true,
-                onBackClick = onBackClick
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddClick,
+                containerColor = ShelfScanGreen,
+                contentColor = Color.White,
+                shape = CircleShape
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Item")
+            }
+        },
+        bottomBar = {
+            ShelfScanBottomBar(
+                currentTab = "List",
+                onInventoryClick = onInventoryClick,
+                onListClick = { },
+                onRecipesClick = onRecipesClick,
+                onSettingsClick = onSettingsClick
             )
         }
     ) { padding ->
