@@ -42,10 +42,7 @@ fun ItemDetailsScreen(
     onMarkConsumed: () -> Unit,
     onRemoveFromPantry: () -> Unit,
 ) {
-    val viewModel: ItemDetailViewModel = viewModel(
-        key = "item_detail_$itemId",
-        factory = ItemDetailViewModel.factory(itemId)
-    )
+    val viewModel: ItemDetailViewModel = viewModel(factory = ItemDetailViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val item = uiState.item
 

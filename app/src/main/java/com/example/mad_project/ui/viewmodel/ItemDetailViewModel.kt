@@ -1,7 +1,9 @@
 package com.example.mad_project.ui.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -24,9 +26,11 @@ data class ItemDetailUiState(
 )
 
 class ItemDetailViewModel(
-    private val itemId: String,
+    savedStateHandle: SavedStateHandle,
     private val repository: PantryRepository
 ) : ViewModel() {
+
+    private val itemId: String = savedStateHandle["itemId"] ?: ""
 
     private val _uiState = MutableStateFlow(ItemDetailUiState())
     val uiState: StateFlow<ItemDetailUiState> = _uiState.asStateFlow()
@@ -41,11 +45,12 @@ class ItemDetailViewModel(
     }
 
     companion object {
-        fun factory(itemId: String): ViewModelProvider.Factory = viewModelFactory {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
+                val savedStateHandle = createSavedStateHandle()
                 val repository =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as ShelfScanApplication).repository
-                ItemDetailViewModel(itemId, repository)
+                ItemDetailViewModel(savedStateHandle, repository)
             }
         }
     }
