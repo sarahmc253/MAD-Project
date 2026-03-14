@@ -16,8 +16,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
+import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,11 +44,12 @@ fun ItemDetailsScreen(
     onDeleteClick: () -> Unit,
     onMarkConsumed: () -> Unit,
     onRemoveFromPantry: () -> Unit,
-    viewModel: ItemDetailViewModel = viewModel(
-        key = "item_detail_$itemId",
-        factory = ItemDetailViewModelFactory(itemId)
-    )
 ) {
+    val application = LocalContext.current.applicationContext as Application
+    val viewModel: ItemDetailViewModel = viewModel(
+        key = "item_detail_$itemId",
+        factory = ItemDetailViewModelFactory(itemId, application)
+    )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val item = uiState.item
 

@@ -20,11 +20,11 @@ import com.example.mad_project.ui.components.EmptyView
 import com.example.mad_project.ui.components.ErrorBanner
 import com.example.mad_project.ui.components.LoadingView
 import com.example.mad_project.ui.theme.ShelfScanGreen
-import com.example.mad_project.ui.viewmodel.PantryViewModel
+import com.example.mad_project.ui.viewmodel.InventoryViewModel
 
 @Composable
 fun PantryScreen(
-    viewModel: PantryViewModel = viewModel()
+    viewModel: InventoryViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -33,11 +33,11 @@ fun PantryScreen(
         else -> {
             Column(Modifier.fillMaxSize()) {
                 uiState.errorMessage?.let { ErrorBanner(message = it) }
-                if (uiState.items.isEmpty()) {
+                if (uiState.pantryItems.isEmpty()) {
                     EmptyPantryContent(onAddSample = viewModel::addItem)
                 } else {
                     PantryContent(
-                        items = uiState.items,
+                        items = uiState.pantryItems,
                         writeInProgress = uiState.writeInProgress,
                         onAddSample = viewModel::addItem,
                         onUpdate = viewModel::updateItem,

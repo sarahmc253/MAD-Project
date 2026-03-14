@@ -21,7 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.PantryModel
 import com.example.mad_project.ui.viewmodel.HomeViewModel
-import com.example.mad_project.ui.viewmodel.PantryViewModel
+import com.example.mad_project.ui.viewmodel.InventoryViewModel
 import com.example.mad_project.ui.inventory.InventoryListScreen
 import com.example.mad_project.ui.inventory.ShelfScanBottomBar
 import com.example.mad_project.ui.item.AddItemScreen
@@ -36,7 +36,7 @@ import com.example.mad_project.ui.theme.MADProjectTheme
 @Composable
 fun ShelfScanHomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
-    pantryViewModel: PantryViewModel = viewModel()
+    inventoryViewModel: InventoryViewModel = viewModel()
 ) {
     val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -85,7 +85,7 @@ fun ShelfScanHomeScreen(
                 onBackClick = homeViewModel::hideAddItemOverlay,
                 onEnterManuallyClick = homeViewModel::hideAddItemOverlay,
                 onAddScannedItem = { name, expiryDate, quantity ->
-                    pantryViewModel.addItem(
+                    inventoryViewModel.addItem(
                         PantryModel(
                             foodName = name,
                             dateScanned = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
