@@ -88,6 +88,7 @@ fun InventoryListScreen(
     var addDialogName by remember { mutableStateOf("") }
     var addDialogExpiry by remember { mutableStateOf("") }
     var addDialogQuantity by remember { mutableStateOf("1") }
+    var addDialogLocation by remember { mutableStateOf(ItemLocation.PANTRY) }
     val filteredItems = uiState.items
         .filter { it.name.contains(searchQuery, ignoreCase = true) }
         .filter { selectedCategory == "All" || it.location.name == selectedCategory.uppercase() }
@@ -107,6 +108,7 @@ fun InventoryListScreen(
                     addDialogName = ""
                     addDialogExpiry = ""
                     addDialogQuantity = "1"
+                    addDialogLocation = ItemLocation.PANTRY
                 },
                 containerColor = ShelfScanGreen,
                 contentColor = Color.White,
@@ -211,9 +213,11 @@ fun InventoryListScreen(
             name = addDialogName,
             expiry = addDialogExpiry,
             quantity = addDialogQuantity,
+            location = addDialogLocation,
             onNameChange = { addDialogName = it },
             onExpiryChange = { addDialogExpiry = it },
             onQuantityChange = { addDialogQuantity = it.filter { c -> c.isDigit() || c == '.' } },
+            onLocationChange = { addDialogLocation = it },
             onConfirm = {
                 val name = addDialogName.trim().ifBlank { "Manual item" }
                 val expiry = addDialogExpiry.trim().takeIf { it.isNotBlank() }
@@ -223,19 +227,22 @@ fun InventoryListScreen(
                         foodName = name,
                         dateScanned = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
                         expiryDate = expiry,
-                        quantity = qty
+                        quantity = qty,
+                        location = addDialogLocation.name
                     )
                 )
                 showAddDialog = false
                 addDialogName = ""
                 addDialogExpiry = ""
                 addDialogQuantity = "1"
+                addDialogLocation = ItemLocation.PANTRY
             },
             onDismiss = {
                 showAddDialog = false
                 addDialogName = ""
                 addDialogExpiry = ""
                 addDialogQuantity = "1"
+                addDialogLocation = ItemLocation.PANTRY
             }
         )
     }
@@ -278,7 +285,7 @@ private fun InventoryHeaderContent(
                     modifier = Modifier.weight(1f),
                     label = "Location",
                     selected = selectedCategory,
-                    options = listOf("All", "Fridge", "Pantry", "Freezer"),
+                    options = listOf("All", "Fridge", "Freezer", "Pantry", "Other"),
                     onSelect = onCategorySelect
                 )
                 FilterDropdown(

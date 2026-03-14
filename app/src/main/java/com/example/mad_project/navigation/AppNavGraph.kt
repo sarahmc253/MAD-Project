@@ -50,7 +50,7 @@ fun AppNavGraph() {
                 AddItemScreen(
                     onBackClick = { navController.popBackStack() },
                     onEnterManuallyClick = { navController.popBackStack() },
-                    onAddScannedItem = { name, expiryDate, quantity ->
+                    onAddScannedItem = { name, expiryDate, quantity, location ->
                         inventoryViewModel.upsertItem(
                             PantryModel(
                                 foodName = name,
@@ -59,7 +59,8 @@ fun AppNavGraph() {
                                     java.util.Locale.getDefault()
                                 ).format(java.util.Date()),
                                 expiryDate = expiryDate,
-                                quantity = quantity
+                                quantity = quantity,
+                                location = location
                             )
                         )
                         navController.popBackStack()

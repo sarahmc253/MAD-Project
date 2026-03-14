@@ -2,6 +2,7 @@ package com.example.mad_project.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.data.OpenFoodFactsProduct
 import com.example.mad_project.data.fetchProductByBarcode
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,8 @@ data class AddItemUiState(
     val openedFromManualEntry: Boolean = false,
     val dialogName: String = "",
     val dialogExpiry: String = "",
-    val dialogQuantity: String = "1"
+    val dialogQuantity: String = "1",
+    val dialogLocation: ItemLocation = ItemLocation.PANTRY
 )
 
 /**
@@ -78,7 +80,8 @@ class AddItemViewModel : ViewModel() {
                 openedFromManualEntry = manualEntry,
                 dialogName = if (manualEntry) "" else (it.productInfo?.displayName ?: it.scannedBarcode ?: ""),
                 dialogExpiry = "",
-                dialogQuantity = "1"
+                dialogQuantity = "1",
+                dialogLocation = ItemLocation.PANTRY
             )
         }
     }
@@ -95,6 +98,10 @@ class AddItemViewModel : ViewModel() {
         _uiState.update { it.copy(dialogQuantity = quantity.filter { c -> c.isDigit() || c == '.' }) }
     }
 
+    fun setDialogLocation(location: ItemLocation) {
+        _uiState.update { it.copy(dialogLocation = location) }
+    }
+
     fun dismissDialog() {
         _uiState.update {
             it.copy(showEditDetailsDialog = false, openedFromManualEntry = false)
@@ -102,16 +109,24 @@ class AddItemViewModel : ViewModel() {
     }
 
     /**
-     * AI-generated. Returns (name, expiryOrNull, quantity). Triple is used to pass multiple
-     * values from the dialog to the add callback.
+     * AI-generated. Returns (name, expiryOrNull, quantity, locationName) for the add callback.
+     * locationName is the ItemLocation enum name (e.g. "FRIDGE") for Firebase.
      *
      * Prompt: Read dialog state and return values for add.
      */
-    fun getDialogValuesForAdd(): Triple<String, String?, Float> {
+    fun getDialogValuesForAdd(): AddDialogValues {
         val s = _uiState.value
         val name = s.dialogName.trim().ifBlank { "Manual item" }
         val expiry = s.dialogExpiry.trim().takeIf { it.isNotBlank() }
         val quantity = s.dialogQuantity.toFloatOrNull() ?: 1f
-        return Triple(name, expiry, quantity)
+        val locationName = s.dialogLocation.name
+        return AddDialogValues(name, expiry, quantity, locationName)
     }
 }
+
+data class AddDialogValues(
+    val name: String,
+    val expiryDate: String?,
+    val quantity: Float,
+    val locationName: String
+)

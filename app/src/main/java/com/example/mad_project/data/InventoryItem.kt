@@ -70,10 +70,11 @@ fun PantryModel.toInventoryItem(): InventoryItem {
 }
 
 enum class ItemLocation(val label: String, val chipBg: Color, val chipText: Color) {
-    FRIDGE("FRIDGE", com.example.mad_project.ui.theme.FridgeBlue, com.example.mad_project.ui.theme.FridgeBlueText),
-    PANTRY("PANTRY", com.example.mad_project.ui.theme.PantryYellow, com.example.mad_project.ui.theme.PantryYellowText),
-    FREEZER("FREEZER", com.example.mad_project.ui.theme.FreezerPurple, com.example.mad_project.ui.theme.FreezerPurpleText),
-    UNKNOWN("UNKNOWN", ChipBg, TextSecondary)
+    FRIDGE("Fridge", com.example.mad_project.ui.theme.FridgeBlue, com.example.mad_project.ui.theme.FridgeBlueText),
+    FREEZER("Freezer", com.example.mad_project.ui.theme.FreezerPurple, com.example.mad_project.ui.theme.FreezerPurpleText),
+    PANTRY("Pantry", com.example.mad_project.ui.theme.PantryYellow, com.example.mad_project.ui.theme.PantryYellowText),
+    OTHER("Other", ChipBg, TextSecondary),
+    UNKNOWN("Unknown", ChipBg, TextSecondary)
 }
 
 enum class ExpiryStatus(val label: String, val colour: Color) {
