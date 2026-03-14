@@ -38,7 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mad_project.data.ExpiryStatus
 import com.example.mad_project.data.InventoryItem
+import com.example.mad_project.data.PantryModel
 import com.example.mad_project.ui.components.SyncLoadingOverlay
+import com.example.mad_project.ui.item.AddDetailsDialog
 import com.example.mad_project.data.ItemLocation
 import com.example.mad_project.ui.theme.*
 import com.example.mad_project.ui.viewmodel.InventoryViewModel
@@ -73,7 +75,6 @@ private fun previewInventoryItem() = InventoryItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryListScreen(
-    onAddClick: () -> Unit,
     onItemClick: (String) -> Unit,
     onScannerClick: () -> Unit,
     viewModel: InventoryViewModel = viewModel()
@@ -83,6 +84,10 @@ fun InventoryListScreen(
     var selectedCategory by remember { mutableStateOf("All") }
     var statusFilter by remember { mutableStateOf("All") }
     var viewMode by remember { mutableStateOf(ViewMode.LIST) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var addDialogName by remember { mutableStateOf("") }
+    var addDialogExpiry by remember { mutableStateOf("") }
+    var addDialogQuantity by remember { mutableStateOf("1") }
     val filteredItems = uiState.items
         .filter { it.name.contains(searchQuery, ignoreCase = true) }
         .filter { selectedCategory == "All" || it.location.name == selectedCategory.uppercase() }
@@ -97,7 +102,12 @@ fun InventoryListScreen(
         topBar = { },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onAddClick,
+                onClick = {
+                    showAddDialog = true
+                    addDialogName = ""
+                    addDialogExpiry = ""
+                    addDialogQuantity = "1"
+                },
                 containerColor = ShelfScanGreen,
                 contentColor = Color.White,
                 shape = CircleShape
@@ -194,6 +204,40 @@ fun InventoryListScreen(
 
     if (uiState.writeInProgress) {
         SyncLoadingOverlay()
+    }
+    if (showAddDialog) {
+        AddDetailsDialog(
+            isManualEntry = true,
+            name = addDialogName,
+            expiry = addDialogExpiry,
+            quantity = addDialogQuantity,
+            onNameChange = { addDialogName = it },
+            onExpiryChange = { addDialogExpiry = it },
+            onQuantityChange = { addDialogQuantity = it.filter { c -> c.isDigit() || c == '.' } },
+            onConfirm = {
+                val name = addDialogName.trim().ifBlank { "Manual item" }
+                val expiry = addDialogExpiry.trim().takeIf { it.isNotBlank() }
+                val qty = addDialogQuantity.toFloatOrNull() ?: 1f
+                viewModel.upsertItem(
+                    PantryModel(
+                        foodName = name,
+                        dateScanned = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
+                        expiryDate = expiry,
+                        quantity = qty
+                    )
+                )
+                showAddDialog = false
+                addDialogName = ""
+                addDialogExpiry = ""
+                addDialogQuantity = "1"
+            },
+            onDismiss = {
+                showAddDialog = false
+                addDialogName = ""
+                addDialogExpiry = ""
+                addDialogQuantity = "1"
+            }
+        )
     }
     }
 }
@@ -674,104 +718,108 @@ private fun InventoryGridCard(
                     .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(avatarBg),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        item.name.first().uppercase(),
-                        color = avatarText,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                }
-                Box {
-                    IconButton(
-                        onClick = { showMenu = true },
-                        modifier = Modifier.size(28.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(avatarBg),
+                        contentAlignment = Alignment.Center
                     ) {
-                    Icon(
-                        Icons.Outlined.MoreVert,
-                        contentDescription = "Options",
-                        tint = colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
+                        Text(
+                            item.name.first().uppercase(),
+                            color = avatarText,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
                     }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                        containerColor = MaterialTheme.colorScheme.surface
+                    Box {
+                        IconButton(
+                            onClick = { showMenu = true },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                Icons.Outlined.MoreVert,
+                                contentDescription = "Options",
+                                tint = colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Delete", color = ExpiredRed) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = ExpiredRed
+                                    )
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onDeleteClick()
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    item.name,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = item.location.chipBg
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("Delete", color = ExpiredRed) },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = null,
-                                    tint = ExpiredRed
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onDeleteClick()
-                            }
+                        Text(
+                            item.location.label,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = item.location.chipText
                         )
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                item.name,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurfaceVariant,
-                fontSize = 13.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                Spacer(modifier = Modifier.height(6.dp))
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = item.location.chipBg
+                    color = item.expiryStatus.colour.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        item.location.label,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        fontSize = 10.sp,
+                        item.expiryDisplay,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = item.location.chipText
+                        color = item.expiryStatus.colour,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Surface(
-                shape = RoundedCornerShape(6.dp),
-                color = item.expiryStatus.colour.copy(alpha = 0.15f)
-            ) {
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    item.expiryDisplay,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = item.expiryStatus.colour,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    item.quantity,
+                    fontSize = 11.sp,
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                 )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                item.quantity,
-                fontSize = 11.sp,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-            )
             }
         }
     }
@@ -809,7 +857,6 @@ fun ShelfScanBottomBar(
 private fun InventoryListScreenPreview() {
     com.example.mad_project.ui.theme.MADProjectTheme {
         InventoryListScreen(
-            onAddClick = {},
             onItemClick = {},
             onScannerClick = {}
         )

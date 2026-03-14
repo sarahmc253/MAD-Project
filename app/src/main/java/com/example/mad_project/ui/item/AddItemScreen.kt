@@ -15,6 +15,8 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -151,6 +153,7 @@ fun AddItemScreen(
 
         if (uiState.showEditDetailsDialog) {
             AddDetailsDialog(
+                isManualEntry = uiState.openedFromManualEntry,
                 name = uiState.dialogName,
                 expiry = uiState.dialogExpiry,
                 quantity = uiState.dialogQuantity,
@@ -339,9 +342,9 @@ private fun EnterManuallyButton(modifier: Modifier = Modifier, onClick: () -> Un
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 24.dp)
+            .padding(horizontal = 24.dp, vertical = 24.dp)
             .navigationBarsPadding(),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
+        colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
         shape = RoundedCornerShape(12.dp)
     ) {
         Icon(Icons.Default.Keyboard, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
@@ -351,7 +354,8 @@ private fun EnterManuallyButton(modifier: Modifier = Modifier, onClick: () -> Un
 }
 
 @Composable
-private fun AddDetailsDialog(
+fun AddDetailsDialog(
+    isManualEntry: Boolean,
     name: String,
     expiry: String,
     quantity: String,
@@ -362,66 +366,83 @@ private fun AddDetailsDialog(
     onDismiss: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val scrollState = rememberScrollState()
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = colorScheme.onSurface,
+        unfocusedTextColor = colorScheme.onSurface,
+        focusedBorderColor = colorScheme.primary,
+        unfocusedBorderColor = colorScheme.outline,
+        cursorColor = colorScheme.primary,
+        focusedLabelColor = colorScheme.primary,
+        unfocusedLabelColor = colorScheme.onSurfaceVariant,
+        focusedContainerColor = colorScheme.surface,
+        unfocusedContainerColor = colorScheme.surface
+    )
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add to list", color = colorScheme.onSurface) },
+        containerColor = colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(24.dp),
+        icon = {
+            Icon(
+                Icons.Default.Keyboard,
+                contentDescription = null,
+                tint = colorScheme.primary,
+                modifier = Modifier.size(40.dp)
+            )
+        },
+        title = {
+            Text(
+                text = if (isManualEntry) "Enter item details" else "Add to list",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = colorScheme.onSurfaceVariant
+            )
+        },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = onNameChange,
-                    label = { Text("Product name", color = colorScheme.onSurfaceVariant) },
+                    label = { Text("Product name") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = colorScheme.onSurface,
-                        unfocusedTextColor = colorScheme.onSurface,
-                        focusedBorderColor = colorScheme.primary,
-                        unfocusedBorderColor = colorScheme.outline,
-                        cursorColor = colorScheme.primary,
-                        focusedLabelColor = colorScheme.primary,
-                        unfocusedLabelColor = colorScheme.onSurfaceVariant
-                    )
+                    shape = RoundedCornerShape(12.dp),
+                    colors = textFieldColors
                 )
                 OutlinedTextField(
                     value = expiry,
                     onValueChange = onExpiryChange,
-                    label = { Text("Expiry date (optional)", color = colorScheme.onSurfaceVariant) },
+                    label = { Text("Expiry date (optional)") },
                     placeholder = { Text("YYYY-MM-DD", color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = colorScheme.onSurface,
-                        unfocusedTextColor = colorScheme.onSurface,
-                        focusedBorderColor = colorScheme.primary,
-                        unfocusedBorderColor = colorScheme.outline,
-                        cursorColor = colorScheme.primary,
-                        focusedLabelColor = colorScheme.primary,
-                        unfocusedLabelColor = colorScheme.onSurfaceVariant
-                    )
+                    shape = RoundedCornerShape(12.dp),
+                    colors = textFieldColors
                 )
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = onQuantityChange,
-                    label = { Text("Quantity", color = colorScheme.onSurfaceVariant) },
+                    label = { Text("Quantity") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = colorScheme.onSurface,
-                        unfocusedTextColor = colorScheme.onSurface,
-                        focusedBorderColor = colorScheme.primary,
-                        unfocusedBorderColor = colorScheme.outline,
-                        cursorColor = colorScheme.primary,
-                        focusedLabelColor = colorScheme.primary,
-                        unfocusedLabelColor = colorScheme.onSurfaceVariant
-                    )
+                    shape = RoundedCornerShape(12.dp),
+                    colors = textFieldColors
                 )
             }
         },
         confirmButton = {
-            Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen)) {
-                Text("Add")
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = ShelfScanGreen),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Add", color = Color.White)
             }
         },
         dismissButton = {

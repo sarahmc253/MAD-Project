@@ -40,7 +40,6 @@ fun AppNavGraph() {
 
             composable(Routes.INVENTORY) {
                 InventoryListScreen(
-                    onAddClick = { navController.navigate(Routes.ADD_ITEM) },
                     onItemClick = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
                     onScannerClick = { navController.navigate(Routes.ADD_ITEM) }
                 )
